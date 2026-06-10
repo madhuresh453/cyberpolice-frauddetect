@@ -1,4 +1,28 @@
 services:
+  # ===== API Gateway =====
+  api-gateway:
+    build:
+      context: .
+      dockerfile: backend/services/api-gateway/Dockerfile
+    container_name: cybershield-gateway
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:5001
+      BANK_SERVICE_URL: http://bank-service:8002
+      EMERGENCY_SERVICE_URL: http://emergency-service:8003
+      CAMPAIGN_SERVICE_URL: http://campaign-service:8004
+      GRAPH_SERVICE_URL: http://graph-service:8005
+      TRUST_SERVICE_URL: http://trust-service:8006
+      AI_COPILOT_URL: http://ai-copilot:8007
+      DEEPFAKE_URL: http://deepfake:8008
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - auth-service
+      - redis
+    restart: unless-stopped
+
+  # ===== Backend Services =====
   backend:
     build:
       context: .
@@ -12,4 +36,287 @@ services:
       MONGODB_URI: ${MONGODB_URI}
       DB_NAME: ${DB_NAME:-cyber-police}
       JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
     restart: unless-stopped
+
+  # ===== Auth Service (FastAPI) =====
+  auth-service:
+    build:
+      context: .
+      dockerfile: backend/services/auth-service/Dockerfile
+    container_name: cybershield-auth
+    ports:
+      - "5001:5000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME:-cyber-police}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://redis:6379
+      PORT: 5000
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # ===== Bank Integration Service =====
+  bank-service:
+    build:
+      context: .
+      dockerfile: backend/services/bank-integration-service/Dockerfile
+    container_name: cybershield-bank
+    ports:
+      - "8002:8000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME:-cyber-police}
+      JWT_SECRET: ${JWT_SECRET}
+    restart: unless-stopped
+
+  # ===== Emergency Response Service =====
+  emergency-service:
+    build:
+      context: .
+      dockerfile: backend/services/emergency-response-service/Dockerfile
+    container_name: cybershield-emergency
+    ports:
+      - "8003:8000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME:-cyber-police}
+      JWT_SECRET: ${JWT_SECRET}
+    restart: unless-stopped
+
+  # ===== Campaign Intelligence Service =====
+  campaign-service:
+    build:
+      context: .
+      dockerfile: backend/services/campaign-intelligence-service/Dockerfile
+    container_name: cybershield-campaign
+    ports:
+      - "8004:8000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME:-cyber-police}
+    restart: unless-stopped
+
+  # ===== Graph Intelligence Service (Neo4j) =====
+  graph-service:
+    build:
+      context: .
+      dockerfile: backend/services/graph-intelligence-service/Dockerfile
+    container_name: cybershield-graph
+    ports:
+      - "8005:8000"
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-cybershield}
+      MONGODB_URI: ${MONGODB_URI}
+    depends_on:
+      - neo4j
+    restart: unless-stopped
+
+  # ===== Digital Trust Service =====
+  trust-service:
+    build:
+      context: .
+      dockerfile: backend/services/digital-trust-service/Dockerfile
+    container_name: cybershield-trust
+    ports:
+      - "8006:8000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME:-cyber-police}
+    restart: unless-stopped
+
+  # ===== AI Copilot Service =====
+  ai-copilot:
+    build:
+      context: .
+      dockerfile: backend/services/ai-copilot-service/Dockerfile
+    container_name: cybershield-copilot
+    ports:
+      - "8007:8000"
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      MONGODB_URI: ${MONGODB_URI}
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  # ===== Deepfake Detection Service =====
+  deepfake:
+    build:
+      context: .
+      dockerfile: backend/services/deepfake-detection-service/Dockerfile
+    container_name: cybershield-deepfake
+    ports:
+      - "8008:8000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      MODEL_PATH: /models/wav2vec
+    volumes:
+      - deepfake-models:/models
+    restart: unless-stopped
+
+  # ===== Government Analytics Service =====
+  gov-analytics:
+    build:
+      context: .
+      dockerfile: backend/services/government-analytics-service/Dockerfile
+    container_name: cybershield-govt
+    ports:
+      - "8009:8000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME:-cyber-police}
+    restart: unless-stopped
+
+  # ===== Education Portal Service =====
+  education-service:
+    build:
+      context: .
+      dockerfile: backend/services/education-service/Dockerfile
+    container_name: cybershield-education
+    ports:
+      - "8010:8000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME:-cyber-police}
+    restart: unless-stopped
+
+  # ===== Frontends =====
+  police-portal:
+    build:
+      context: .
+      dockerfile: portals/police-admin/Dockerfile
+    container_name: cybershield-police-portal
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    restart: unless-stopped
+
+  isp-portal:
+    build:
+      context: .
+      dockerfile: portals/isp-portal/Dockerfile
+    container_name: cybershield-isp-portal
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    restart: unless-stopped
+
+  citizen-portal:
+    build:
+      context: .
+      dockerfile: apps/citizen-web/Dockerfile
+    container_name: cybershield-citizen
+    ports:
+      - "3002:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    restart: unless-stopped
+
+  # ===== Infrastructure =====
+  neo4j:
+    image: neo4j:5-community
+    container_name: cybershield-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-cybershield}
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_max__size: 1G
+    volumes:
+      - neo4j-data:/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: cybershield-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cybershield-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+
+  # ===== Monitoring =====
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cybershield-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/data
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cybershield-grafana
+    ports:
+      - "3003:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana-dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:latest
+    container_name: cybershield-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+    restart: unless-stopped
+
+  # ===== Message Queue =====
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: cybershield-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: cybershield-kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    restart: unless-stopped
+
+volumes:
+  neo4j-data:
+  redis-data:
+  ollama-models:
+  deepfake-models:
+  prometheus-data:
+  grafana-data:
+  loki-data:

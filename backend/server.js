@@ -12,6 +12,23 @@ async function startServer() {
   const app = createApp();
   const server = createServer(app);
 
+  server.on("error", async (error) => {
+    if (error.code === "EADDRINUSE") {
+      console.error(
+        JSON.stringify({
+          level: "fatal",
+          message: `Port ${config.port} is already in use`,
+          port: config.port,
+          error: "EADDRINUSE"
+        })
+      );
+      await disconnectMongoDB();
+      process.exit(1);
+    } else {
+      throw error;
+    }
+  });
+
   server.listen(config.port, () => {
     console.log(
       JSON.stringify({
