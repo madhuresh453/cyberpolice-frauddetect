@@ -1,0 +1,8 @@
+﻿[project]
+name = "cybershield-scam-analysis-service"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "CYBERSHIELD AI scam-analysis-service."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

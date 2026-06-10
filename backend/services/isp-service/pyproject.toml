@@ -1,0 +1,8 @@
+﻿[project]
+name = "cybershield-isp-service"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "CYBERSHIELD AI isp-service."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

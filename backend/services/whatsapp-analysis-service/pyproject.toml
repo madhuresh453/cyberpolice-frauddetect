@@ -1,0 +1,8 @@
+﻿[project]
+name = "cybershield-whatsapp-analysis-service"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "CYBERSHIELD AI whatsapp-analysis-service."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,8 @@
+﻿[project]
+name = "cybershield-upi-fraud-service"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "CYBERSHIELD AI upi-fraud-service."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

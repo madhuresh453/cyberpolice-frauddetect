@@ -1,0 +1,5 @@
+﻿[project]
+name = "cybershield-ai-intent-analysis"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "CYBERSHIELD AI intent-analysis module."

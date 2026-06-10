@@ -1,0 +1,3 @@
+packages:
+  - "apps/police-portal"
+  - "apps/isp-portal"
