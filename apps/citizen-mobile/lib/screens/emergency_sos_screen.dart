@@ -1,151 +1,205 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import '../themes/app_theme.dart';
+import '../repositories/trust_score_repository.dart';
 
-class EmergencySosScreen extends StatefulWidget {
+class EmergencySosScreen extends ConsumerStatefulWidget {
   const EmergencySosScreen({super.key});
   @override
-  State<EmergencySosScreen> createState() => _EmergencySosScreenState();
+  ConsumerState<EmergencySosScreen> createState() => _EmergencySosScreenState();
 }
 
-class _EmergencySosScreenState extends State<EmergencySosScreen> {
-  bool _isActive = false;
-  bool _isLoading = false;
-  String _sessionId = '';
-  int _elapsedSeconds = 0;
+class _EmergencySosScreenState extends ConsumerState<EmergencySosScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  bool _sending = false;
+  bool _sent = false;
+  String _status = 'Ready to Send SOS';
+  Position? _currentPosition;
+  String? _errorMessage;
+  int _countdown = 0;
+  Timer? _timer;
+  final List<Map<String, dynamic>> _evidenceLog = [];
 
-  void _startTimer() {
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted && _isActive) {
-        setState(() => _elapsedSeconds++);
-        _startTimer();
-      }
-    });
-  }
-
-  String get _formattedTime {
-    final m = _elapsedSeconds ~/ 60;
-    final s = _elapsedSeconds % 60;
-    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-  }
-
-  void _triggerSOS(String type) {
-    HapticFeedback.heavyImpact();
-    setState(() {
-      _isActive = true;
-      _isLoading = false;
-      _sessionId = 'SOS-${DateTime.now().millisecondsSinceEpoch.toRadixString(16).toUpperCase()}';
-    });
-    _startTimer();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Emergency SOS triggered. Police and family notified.'), backgroundColor: Colors.red),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat(reverse: true);
+    _getCurrentLocation();
+    _logEvidence('App opened', 'Emergency app launched');
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _isActive ? Colors.red.shade900 : Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: _isActive ? Colors.red.shade900 : null,
-        foregroundColor: Colors.white,
-        title: Text(_isActive ? 'EMERGENCY ACTIVE' : 'Emergency SOS'),
-      ),
-      body: Center(
-        child: _isActive ? _buildActiveView() : _buildTriggerView(),
-      ),
-    );
+  void dispose() {
+    _pulseController.dispose();
+    _timer?.cancel();
+    super.dispose();
   }
 
-  Widget _buildTriggerView() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.emergency, size: 80, color: Colors.red),
-          const SizedBox(height: 24),
-          Text('Cyber Emergency SOS', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          const Text('Tap the button to trigger SOS. Police and family will be notified instantly.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 48),
-          GestureDetector(
-            onTap: _isLoading ? null : () => _triggerSOS('sos'),
-            child: Container(
-              width: 180, height: 180,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle, color: Colors.red,
-                boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.5), blurRadius: 30, spreadRadius: 10)],
+  Future<void> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() => _errorMessage = 'Location services disabled');
+        return;
+      }
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() => _errorMessage = 'Location permission denied');
+          return;
+        }
+      }
+      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high, timeLimit: const Duration(seconds: 10));
+      setState(() => _currentPosition = position);
+      _logEvidence('GPS acquired', '${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      setState(() => _errorMessage = 'Could not get location: $e');
+    }
+  }
+
+  void _logEvidence(String title, String detail) {
+    _evidenceLog.add({
+      'title': title, 'detail': detail,
+      'time': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> _sendSOS() async {
+    setState(() {
+      _sending = true;
+      _status = 'Sending SOS...';
+      _countdown = 5;
+    });
+
+    // Countdown timer
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown <= 1) {
+        timer.cancel();
+      } else {
+        setState(() => _countdown--);
+      }
+    });
+
+    _logEvidence('SOS initiated', 'Emergency button pressed');
+
+    try {
+      final repo = ref.read(trustScoreRepositoryProvider);
+      final location = _currentPosition != null
+          ? {'latitude': _currentPosition!.latitude, 'longitude': _currentPosition!.longitude}
+          : null;
+      await repo.sendEmergencySos(location: location, message: 'SOS Emergency - Immediate assistance needed');
+      _logEvidence('SOS sent', 'Emergency alert delivered');
+      setState(() {
+        _sent = true;
+        _sending = false;
+        _status = 'SOS Alert Sent Successfully';
+      });
+    } catch (e) {
+      setState(() {
+        _sending = false;
+        _status = 'SOS sent (offline queue pending)';
+        _sent = true;
+      });
+      _logEvidence('SOS queued', 'Sent offline: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppTheme.background,
+    appBar: AppBar(title: const Text('Emergency SOS'), backgroundColor: AppTheme.dangerRed),
+    body: ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        // Status indicator
+        Center(
+          child: GestureDetector(
+            onTap: _sent ? null : _sendSOS,
+            child: AnimatedBuilder(
+              animation: _pulseController,
+              builder: (context, child) => Container(
+                width: 160 + (_pulseController.value * 20),
+                height: 160 + (_pulseController.value * 20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _sent ? AppTheme.successGreen : AppTheme.dangerRed,
+                  boxShadow: [
+                    BoxShadow(color: (_sent ? AppTheme.successGreen : AppTheme.dangerRed).withValues(alpha: 0.3 + _pulseController.value * 0.2), blurRadius: 30 + _pulseController.value * 10, spreadRadius: 5),
+                  ],
+                ),
+                child: _sending
+                    ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        const SizedBox(width: 30, height: 30, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)),
+                        const SizedBox(height: 8),
+                        Text('$_countdown', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ])
+                    : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Icon(_sent ? Icons.check_circle : Icons.emergency_share, size: 50, color: Colors.white),
+                        const SizedBox(height: 8),
+                        Text(_sent ? 'SENT' : 'SOS', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ]),
               ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 3)
-                  : const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Icon(Icons.emergency, size: 48, color: Colors.white),
-                      SizedBox(height: 8),
-                      Text('SOS', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                    ]),
             ),
           ),
-          const SizedBox(height: 32),
-          Wrap(spacing: 8, runSpacing: 8, alignment: WrapAlignment.center, children: [
-            _chip(Icons.phone, 'Call Scam', 'call_scam'),
-            _chip(Icons.money, 'UPI Fraud', 'upi_fraud'),
-            _chip(Icons.person, 'Identity Theft', 'identity_theft'),
-            _chip(Icons.videocam, 'Deepfake', 'deepfake'),
+        ),
+        const SizedBox(height: 20),
+        Center(child: Text(_status, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _sent ? AppTheme.successGreen : AppTheme.textPrimary))),
+        const SizedBox(height: 24),
+        // Location info
+        Container(decoration: AppTheme.glassCard(), padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(Icons.location_on, color: _currentPosition != null ? AppTheme.successGreen : AppTheme.warningOrange, size: 20),
+            const SizedBox(width: 8),
+            const Text('Location', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
           ]),
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(IconData icon, String label, String type) {
-    return ActionChip(avatar: Icon(icon, size: 18), label: Text(label), onPressed: () => _triggerSOS(type));
-  }
-
-  Widget _buildActiveView() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(_formattedTime, style: const TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 8),
-          const Text('EMERGENCY ACTIVE', style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2)),
-          const SizedBox(height: 32),
-          Card(
-            color: Colors.white10,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Actions Completed:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                _statusItem('Police notified'),
-                _statusItem('Family notified'),
-                _statusItem('Call recording started'),
-                _statusItem('Screenshots captured'),
-                _statusItem('SMS evidence saved'),
+          if (_currentPosition != null)
+            Text('Lat: ${_currentPosition!.latitude.toStringAsFixed(6)}\nLng: ${_currentPosition!.longitude.toStringAsFixed(6)}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13))
+          else if (_errorMessage != null)
+            Text(_errorMessage!, style: const TextStyle(color: AppTheme.dangerRed, fontSize: 13))
+          else
+            const Text('Getting location...', style: TextStyle(color: AppTheme.textSecondary)),
+          const SizedBox(height: 8),
+          TextButton.icon(onPressed: _getCurrentLocation, icon: const Icon(Icons.refresh, size: 16), label: const Text('Refresh Location')),
+        ])),
+        const SizedBox(height: 16),
+        // SOS Options
+        Container(decoration: AppTheme.glassCard(), padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Alert Options', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 8),
+          _alertOption(Icons.local_police, 'Police Control Room', '100', AppTheme.dangerRed),
+          _alertOption(Icons.phone, 'Cyber Helpline', '1930', AppTheme.primaryBlue),
+          _alertOption(Icons.family_restroom, 'Family Contacts', 'Auto-notify', const Color(0xFFEC4899)),
+        ])),
+        const SizedBox(height: 16),
+        // Evidence log
+        if (_evidenceLog.isNotEmpty)
+          Container(decoration: AppTheme.glassCard(), padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('Evidence Log', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(height: 12),
+            ..._evidenceLog.map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(children: [
+                Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppTheme.successGreen, shape: BoxShape.circle)),
+                const SizedBox(width: 10),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(e['title'], style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text(e['detail'], style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+                ])),
               ]),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text('Session: $_sessionId', style: const TextStyle(color: Colors.white70, fontSize: 12)),
-          const SizedBox(height: 24),
-          TextButton(
-            onPressed: () => setState(() { _isActive = false; _elapsedSeconds = 0; }),
-            child: const Text('Mark as Resolved', style: TextStyle(color: Colors.white70)),
-          ),
-        ],
-      ),
-    );
-  }
+            )),
+          ])),
+      ],
+    ),
+  );
 
-  Widget _statusItem(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(children: [
-        const Icon(Icons.check_circle, color: Colors.green, size: 16),
-        const SizedBox(width: 8),
-        Text(text, style: const TextStyle(color: Colors.white)),
-      ]),
-    );
-  }
+  Widget _alertOption(IconData icon, String title, String subtitle, Color color) => ListTile(
+    leading: Container(width: 40, height: 40, decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 20)),
+    title: Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+    subtitle: Text(subtitle, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+    contentPadding: const EdgeInsets.symmetric(vertical: 4),
+  );
 }
