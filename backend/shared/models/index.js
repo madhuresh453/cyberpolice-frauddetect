@@ -1,3 +1,4 @@
+import ChainOfCustody from "./ChainOfCustody.js";
 import AdminUser from "./AdminUser.js";
 import AIPrediction from "./AIPrediction.js";
 import ActivityLog from "./ActivityLog.js";
@@ -57,6 +58,7 @@ import WhatsappAnalysis from "./WhatsappAnalysis.js";
 
 export const models = {
   ActivityLog,
+  ChainOfCustody,
   AdminUser,
   AIPrediction,
   ApiKey,
@@ -117,6 +119,7 @@ export const models = {
 export {
   ActivityLog,
   AdminUser,
+  ChainOfCustody,
   AIPrediction,
   ApiKey,
   AuditLog,

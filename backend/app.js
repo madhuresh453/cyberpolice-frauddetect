@@ -4,7 +4,13 @@ import { databaseHealthMiddleware } from "./shared/middlewares/databaseHealth.mi
 import { errorHandler } from "./shared/middlewares/errorHandler.middleware.js";
 import { requestLogger } from "./shared/middlewares/requestLogger.middleware.js";
 import healthRoutes from "./shared/routes/health.routes.js";
+import citizenRoutes from "./shared/routes/citizen.routes.js";
+import policeRoutes from "./shared/routes/police.routes.js";
+import ispRoutes from "./shared/routes/isp.routes.js";
+import governmentRoutes from "./shared/routes/government.routes.js";
 import { getDatabaseHealth } from "./shared/database/healthcheck.js";
+import { connectRedis } from "./shared/database/redis.js";
+import { connectNeo4j } from "./shared/services/neo4j.service.js";
 import { config } from "./shared/database/database.config.js";
 
 const ROUTE_REGISTRY = [];
@@ -13,10 +19,17 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
-  app.use(express.json({ limit: "1mb" }));
+
+  // Increase limit for evidence uploads
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
   app.use(requestLogger);
   app.use(databaseHealthMiddleware);
   app.use(healthRoutes);
+
+  // Connect Redis and Neo4j asynchronously (non-blocking)
+  connectRedis().catch(() => {});
+  connectNeo4j().catch(() => {});
 
   // ===== ROOT ROUTE =====
   app.get("/", async (_req, res) => {
@@ -288,6 +301,53 @@ export function createApp() {
     }
   });
   ROUTE_REGISTRY.push({ method: "GET", path: "/database/collections", description: "List all collections with counts" });
+
+  // ===== MOUNT DOMAIN ROUTES =====
+  app.use("/api/v1/citizen", citizenRoutes);
+  ROUTE_REGISTRY.push(
+    { method: "POST", path: "/api/v1/citizen/report/call", description: "Report fraudulent call" },
+    { method: "POST", path: "/api/v1/citizen/report/sms", description: "Report fraudulent SMS" },
+    { method: "POST", path: "/api/v1/citizen/report/whatsapp", description: "Report fraudulent WhatsApp message" },
+    { method: "GET", path: "/api/v1/citizen/trust-score/:number", description: "Get trust score for a number" },
+    { method: "GET", path: "/api/v1/citizen/history", description: "Get report history" },
+    { method: "POST", path: "/api/v1/citizen/block-number", description: "Block a number" },
+    { method: "POST", path: "/api/v1/citizen/emergency-sos", description: "Send SOS alert" },
+    { method: "GET", path: "/api/v1/citizen/family-protection", description: "Get family protection status" },
+    { method: "POST", path: "/api/v1/citizen/evidence/upload", description: "Upload evidence" }
+  );
+
+  app.use("/api/v1/police", policeRoutes);
+  ROUTE_REGISTRY.push(
+    { method: "GET", path: "/api/v1/police/cases", description: "List all cases" },
+    { method: "POST", path: "/api/v1/police/cases", description: "Create new case" },
+    { method: "GET", path: "/api/v1/police/firs", description: "List all FIRs" },
+    { method: "POST", path: "/api/v1/police/firs", description: "Create new FIR" },
+    { method: "GET", path: "/api/v1/police/evidence", description: "List all evidence" },
+    { method: "GET", path: "/api/v1/police/analytics", description: "Get fraud analytics" },
+    { method: "GET", path: "/api/v1/police/heatmap", description: "Get fraud heatmap" },
+    { method: "GET", path: "/api/v1/police/fraud-network", description: "Get fraud network data" },
+    { method: "POST", path: "/api/v1/police/bank-freeze", description: "Request bank account freeze" },
+    { method: "POST", path: "/api/v1/police/deepfake-analysis", description: "Submit deepfake analysis" }
+  );
+
+  app.use("/api/v1/isp", ispRoutes);
+  ROUTE_REGISTRY.push(
+    { method: "GET", path: "/api/v1/isp/number-intelligence", description: "Get number intelligence" },
+    { method: "GET", path: "/api/v1/isp/sms-firewall", description: "Get SMS firewall data" },
+    { method: "GET", path: "/api/v1/isp/traffic-analysis", description: "Get traffic analysis" },
+    { method: "GET", path: "/api/v1/isp/blocked-numbers", description: "Get blocked numbers" },
+    { method: "GET", path: "/api/v1/isp/fraud-campaigns", description: "Get fraud campaigns" },
+    { method: "GET", path: "/api/v1/isp/threat-feed", description: "Get threat feed" }
+  );
+
+  app.use("/api/v1/government", governmentRoutes);
+  ROUTE_REGISTRY.push(
+    { method: "GET", path: "/api/v1/government/national-dashboard", description: "National fraud dashboard" },
+    { method: "GET", path: "/api/v1/government/state-dashboard", description: "State fraud dashboard" },
+    { method: "GET", path: "/api/v1/government/district-dashboard", description: "District fraud dashboard" },
+    { method: "GET", path: "/api/v1/government/fraud-trends", description: "Fraud trend analysis" },
+    { method: "GET", path: "/api/v1/government/economic-impact", description: "Economic impact analysis" }
+  );
 
   // ===== ERROR HANDLER (must be last) =====
   app.use(errorHandler);
