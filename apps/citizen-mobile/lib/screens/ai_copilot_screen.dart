@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import '../themes/app_theme.dart';
 
 class AiCopilotScreen extends StatefulWidget {
