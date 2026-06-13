@@ -868,35 +868,115 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
+  /// Auto-format phone number to E.164 as the user types.
+  /// Adds +91 prefix if no + is present (India default).
+  void _onPhoneChanged(String value) {
+    if (value.isEmpty) return;
+    final lastChar = value[value.length - 1];
+    // Only auto-format when user is not deleting
+    if (RegExp(r'[0-9+]').hasMatch(lastChar) && !value.startsWith('+')) {
+      // Auto-format only if they typed enough digits
+      final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+      if (digits.length == 10 && !value.contains('+')) {
+        _phoneController.value = TextEditingValue(
+          text: '+91$digits',
+          selection: const TextSelection.collapsed(offset: 13),
+        );
+      }
+    }
+  }
+
+  /// Validate email format.
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return emailRegex.hasMatch(email);
+  }
+
+  /// Validate phone number (at least 10 digits).
+  bool _isValidPhone(String phone) {
+    final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    return digits.length >= 10;
+  }
+
+  /// Validate password strength.
+  String? _validatePassword(String password) {
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return 'Password must contain an uppercase letter';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      return 'Password must contain a lowercase letter';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return 'Password must contain a number';
+    }
+    return null;
+  }
+
+  /// Normalize phone to E.164 format.
+  String _normalizePhone(String phone) {
+    final cleaned = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+    if (cleaned.startsWith('+')) return cleaned;
+    if (cleaned.length >= 10) return '+$cleaned';
+    return phone;
+  }
+
   Future<void> _handleRegister() async {
-    if (_nameController.text.isEmpty) {
-      _showError('Please enter your name');
+    // Validate name
+    if (_nameController.text.trim().isEmpty) {
+      _showError('Please enter your full name');
       return;
     }
-    if (_emailController.text.isEmpty) {
-      _showError('Please enter your email');
+
+    // Validate email
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showError('Please enter your email address');
       return;
     }
-    if (_phoneController.text.isEmpty) {
+    if (!_isValidEmail(email)) {
+      _showError('Please enter a valid email address');
+      return;
+    }
+
+    // Validate and auto-format phone
+    final rawPhone = _phoneController.text.trim();
+    if (rawPhone.isEmpty) {
       _showError('Please enter your phone number');
       return;
     }
-    if (_passwordController.text.length < 6) {
-      _showError('Password must be at least 6 characters');
+    final normalizedPhone = _normalizePhone(rawPhone);
+    if (!_isValidPhone(normalizedPhone)) {
+      _showError('Please enter a valid phone number (at least 10 digits)');
       return;
     }
-    if (_passwordController.text != _confirmPasswordController.text) {
+
+    // Validate password
+    final password = _passwordController.text;
+    final passwordError = _validatePassword(password);
+    if (passwordError != null) {
+      _showError(passwordError);
+      return;
+    }
+
+    // Confirm password
+    if (password != _confirmPasswordController.text) {
       _showError('Passwords do not match');
       return;
     }
+
+    // Check terms
     if (!_agreedToTerms) {
-      _showError('Please agree to the terms of service');
+      _showError('Please agree to the terms of service and privacy policy');
       return;
     }
+
     await ref.read(authProvider.notifier).register(
-      _emailController.text.trim(),
-      _phoneController.text.trim(),
-      _passwordController.text,
+      email,
+      normalizedPhone, // Send E.164 formatted number
+      password,
       _nameController.text.trim(),
     );
   }

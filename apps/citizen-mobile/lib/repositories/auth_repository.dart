@@ -20,27 +20,56 @@ class AuthRepository {
       });
       final data = response.data as Map<String, dynamic>;
       await _handleAuthResponse(data);
-      
+
       final userResponse = await _api.get(ApiEndpoints.me);
-      return UserModel.fromJson(userResponse.data as Map<String, dynamic>);
+      final userData = userResponse.data as Map<String, dynamic>;
+      // Handle both {success, id, email, ...} and {id, email, ...}
+      if (userData['success'] == true && userData['id'] != null) {
+        return UserModel.fromJson(userData);
+      }
+      return UserModel.fromJson(userData);
     } catch (e) {
       throw _handleError(e);
     }
   }
 
+  /// Normalize a phone number to E.164 format on the client side.
+  /// If the number doesn't start with "+", prepend "+91" (India default).
+  String _normalizePhone(String phone) {
+    final cleaned = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+    if (cleaned.startsWith('+')) {
+      return cleaned;
+    }
+    // If it starts with a country code like 91, prepend +
+    if (cleaned.length >= 10 && !cleaned.startsWith('+')) {
+      return '+$cleaned';
+    }
+    return phone;
+  }
+
   Future<UserModel> register(String email, String phone, String password, String name) async {
     try {
+      // Auto-normalize phone to E.164 on client side before sending
+      final normalizedPhone = _normalizePhone(phone);
+
       final response = await _api.post(ApiEndpoints.register, data: {
         'email': email,
-        'phone_number': phone,
+        'phone_number': normalizedPhone,  // Using snake_case consistently
         'password': password,
         'full_name': name,
         'user_type': 'citizen',
       });
       final data = response.data as Map<String, dynamic>;
-      if (data.containsKey('access_token') || data.containsKey('tokens')) {
+      if (data['success'] == true && data['accessToken'] != null) {
+        await _handleAuthResponse(data);
+      } else if (data['access_token'] != null || data['accessToken'] != null) {
         await _handleAuthResponse(data);
       }
+      // New response wraps user object
+      if (data['user'] != null) {
+        return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+      }
+      // Old response has user fields at top level
       return UserModel.fromJson(data);
     } catch (e) {
       throw _handleError(e);
@@ -64,10 +93,13 @@ class AuthRepository {
         'otp': otp,
       });
       final data = response.data as Map<String, dynamic>;
-      await _handleAuthResponse(data);
-      
+      if (data['success'] == true && data['accessToken'] != null) {
+        await _handleAuthResponse(data);
+      }
+
       final userResponse = await _api.get(ApiEndpoints.me);
-      return UserModel.fromJson(userResponse.data as Map<String, dynamic>);
+      final userData = userResponse.data as Map<String, dynamic>;
+      return UserModel.fromJson(userData['success'] == true ? userData : userData);
     } catch (e) {
       throw _handleError(e);
     }
@@ -90,10 +122,13 @@ class AuthRepository {
         'id_token': 'google_id_token_placeholder', // Replace with actual Google sign-in
       });
       final data = response.data as Map<String, dynamic>;
-      await _handleAuthResponse(data);
-      
+      if (data['success'] == true && data['accessToken'] != null) {
+        await _handleAuthResponse(data);
+      }
+
       final userResponse = await _api.get(ApiEndpoints.me);
-      return UserModel.fromJson(userResponse.data as Map<String, dynamic>);
+      final userData = userResponse.data as Map<String, dynamic>;
+      return UserModel.fromJson(userData['success'] == true ? userData : userData);
     } catch (e) {
       throw _handleError(e);
     }
@@ -137,7 +172,7 @@ class AuthRepository {
       final data = response.data as Map<String, dynamic>;
       return {
         'secret': data['secret'] ?? '',
-        'qr_code': data['qr_code_svg'] != null 
+        'qr_code': data['qr_code_svg'] != null
             ? _decodeSvgQrCode(data['qr_code_svg'])
             : null,
         'recovery_codes': List<String>.from(data['recovery_codes'] ?? []),
@@ -165,9 +200,10 @@ class AuthRepository {
       });
       final data = response.data as Map<String, dynamic>;
       await _handleAuthResponse(data);
-      
+
       final userResponse = await _api.get(ApiEndpoints.me);
-      return UserModel.fromJson(userResponse.data as Map<String, dynamic>);
+      final userData = userResponse.data as Map<String, dynamic>;
+      return UserModel.fromJson(userData['success'] == true ? userData : userData);
     } catch (e) {
       throw _handleError(e);
     }
@@ -176,7 +212,12 @@ class AuthRepository {
   Future<UserModel> getCurrentUser() async {
     try {
       final response = await _api.get(ApiEndpoints.me);
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data as Map<String, dynamic>;
+      // Handle { success: true, id: ..., email: ... }
+      if (data['success'] == true && data['id'] != null) {
+        return UserModel.fromJson(data);
+      }
+      return UserModel.fromJson(data);
     } catch (e) {
       throw _handleError(e);
     }
@@ -217,7 +258,11 @@ class AuthRepository {
   Future<UserModel> updateProfile(Map<String, dynamic> data) async {
     try {
       final response = await _api.put('/auth/me', data: data);
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
+      final responseData = response.data as Map<String, dynamic>;
+      if (responseData['success'] == true && responseData['id'] != null) {
+        return UserModel.fromJson(responseData);
+      }
+      return UserModel.fromJson(responseData);
     } catch (e) {
       throw _handleError(e);
     }
@@ -231,9 +276,16 @@ class AuthRepository {
         'refresh_token': refreshToken,
       });
       final data = response.data as Map<String, dynamic>;
-      await _api.setToken(data['access_token'] as String);
-      await _storage.write(key: StorageKeys.refreshToken, value: data['refresh_token'] as String);
-      return data['access_token'] as String;
+      // Support both accessToken and access_token
+      final accessToken = data['accessToken'] as String? ?? data['access_token'] as String?;
+      final newRefreshToken = data['refreshToken'] as String? ?? data['refresh_token'] as String?;
+      if (accessToken != null) {
+        await _api.setToken(accessToken);
+      }
+      if (newRefreshToken != null) {
+        await _storage.write(key: StorageKeys.refreshToken, value: newRefreshToken);
+      }
+      return accessToken;
     } catch (_) {
       await _clearAuth();
       return null;
@@ -246,17 +298,26 @@ class AuthRepository {
   }
 
   Future<void> _handleAuthResponse(Map<String, dynamic> data) async {
-    final accessToken = data['access_token'] as String?;
-    final refreshToken = data['refresh_token'] as String?;
-    
+    // Support both camelCase (new) and snake_case (old) formats
+    final accessToken = data['accessToken'] as String? ?? data['access_token'] as String?;
+    final refreshToken = data['refreshToken'] as String? ?? data['refresh_token'] as String?;
+
     if (accessToken != null) {
       await _api.setToken(accessToken);
     }
     if (refreshToken != null) {
       await _storage.write(key: StorageKeys.refreshToken, value: refreshToken);
     }
-    if (data.containsKey('user_id')) {
-      await _storage.write(key: StorageKeys.userId, value: data['user_id'].toString());
+    // Support both user.id and user.user_id and top-level user_id
+    String? userId;
+    if (data['user'] != null) {
+      final user = data['user'] as Map<String, dynamic>;
+      userId = user['id'] as String? ?? user['user_id'] as String?;
+    } else {
+      userId = data['id'] as String? ?? data['user_id'] as String?;
+    }
+    if (userId != null) {
+      await _storage.write(key: StorageKeys.userId, value: userId);
     }
     // Check MFA required
     if (data.containsKey('mfa_required') && data['mfa_required'] == true) {
@@ -291,4 +352,3 @@ class AuthRepository {
     return 'Something went wrong. Please try again.';
   }
 }
-
