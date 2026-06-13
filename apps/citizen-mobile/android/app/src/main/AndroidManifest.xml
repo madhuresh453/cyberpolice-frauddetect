@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cybershield.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Permissions for Protection Engine -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -35,11 +34,9 @@
         android:name="${applicationName}"
         android:label="CyberShield AI"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="true"
         android:usesCleartextTraffic="true"
-        android:hardwareAccelerated="true"
-        android:fullBackupContent="@xml/backup_rules">
+        android:hardwareAccelerated="true">
 
         <activity
             android:name=".MainActivity"
@@ -72,49 +69,46 @@
             android:foregroundServiceType="dataSync" />
 
         <!-- WhatsApp Monitoring Service -->
-        <service
+        <!-- <service
             android:name=".services.WhatsappMonitorService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="dataSync" /> -->
 
         <!-- WhatsApp Accessibility Service -->
-        <service
+        <!-- <service
             android:name=".services.WhatsappAccessibilityService"
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config" />
-        </service>
+        </service> -->
 
         <!-- Notification Listener Service -->
-        <service
+        <!-- <service
             android:name=".services.NotificationListenerServiceImpl"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
-        </service>
+        </service> -->
 
         <!-- Floating Warning Overlay Service -->
-        <service
+        <!-- <service
             android:name=".services.FloatingWarningService"
             android:exported="false"
-            android:foregroundServiceType="systemExempted" />
+            android:foregroundServiceType="systemExempted" /> -->
 
         <!-- Boot Receiver -->
-        <receiver
+        <!-- <receiver
             android:name=".receivers.BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
-        </receiver>
+        </receiver> -->
 
         <!-- SMS Broadcast Receiver -->
         <receiver
@@ -127,14 +121,14 @@
         </receiver>
 
         <!-- Phone State Receiver -->
-        <receiver
+        <!-- <receiver
             android:name=".receivers.PhoneStateReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
-        </receiver>
+        </receiver> -->
 
         <meta-data
             android:name="flutterEmbedding"
