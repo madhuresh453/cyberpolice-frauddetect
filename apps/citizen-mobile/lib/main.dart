@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'app.dart';
 import 'services/local_notification_service.dart';
 
@@ -11,7 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize Firebase
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
   
   // Initialize Hive for offline storage
   await Hive.initFlutter();
@@ -24,20 +24,20 @@ void main() async {
   await LocalNotificationService.initialize();
   
   // Setup Firebase Cloud Messaging
-  final messaging = FirebaseMessaging.instance;
-  await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-    criticalAlert: true,
-  );
+  // final messaging = FirebaseMessaging.instance;
+  // await messaging.requestPermission(
+  //   alert: true,
+  //   badge: true,
+  //   sound: true,
+  //   criticalAlert: true,
+  // );
   
-  messaging.onTokenRefresh.listen((token) {
-    // Send token to backend
-  });
+  // messaging.onTokenRefresh.listen((token) {
+  //   // Send token to backend
+  // });
   
   // Handle background messages
-  FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
+  // FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
   
   // Lock orientation to portrait for security screens
   await SystemChrome.setPreferredOrientations([
@@ -58,8 +58,8 @@ void main() async {
   );
 }
 
-@pragma('vm:entry-point')
-Future<void> backgroundMessageHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  await LocalNotificationService.showBackgroundNotification(message);
-}
+// @pragma('vm:entry-point')
+// Future<void> backgroundMessageHandler(RemoteMessage message) async {
+//   await Firebase.initializeApp();
+//   await LocalNotificationService.showBackgroundNotification(message);
+// }

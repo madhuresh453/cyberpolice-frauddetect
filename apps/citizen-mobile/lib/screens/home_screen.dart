@@ -129,8 +129,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: Icon(_getReportIcon(report.type), color: AppTheme.dangerRed, size: 20)),
                           const SizedBox(width: 12),
                           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(report.fraudType ?? report.type, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-                            Text(report.description ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                            Text(report.fraudType, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+                            Text(report.description, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                           ])),
                           Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(color: _getReportColor(report.status).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),

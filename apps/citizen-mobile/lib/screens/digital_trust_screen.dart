@@ -95,7 +95,7 @@ class _DigitalTrustScreenState extends ConsumerState<DigitalTrustScreen> {
         const Text('Score Breakdown', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
         const SizedBox(height: 12),
         _factor('Total Reports', '${trustScore?.totalReports ?? 0}', trustScore?.totalReports ?? 0, AppTheme.primaryBlue),
-        _factor('Risk Score', '${trustScore?.riskScore ?? 0}', trustScore?.riskScore ?? 0, _getScoreColor(100 - (trustScore?.riskScore ?? 0))),
+        _factor('Risk Score', '${trustScore?.riskScore ?? 0}', (trustScore?.score ?? 0), _getScoreColor(100 - (trustScore?.score ?? 0))),
         _factor('Trust Level', '${trustScore?.score ?? 0}', trustScore?.score ?? 0, _getScoreColor(trustScore?.score ?? 0)),
       ]),
     );

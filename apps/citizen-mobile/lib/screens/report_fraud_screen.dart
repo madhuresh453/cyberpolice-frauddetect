@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +18,7 @@ class _ReportFraudScreenState extends ConsumerState<ReportFraudScreen> {
   final _detailsController = TextEditingController();
   final _amountController = TextEditingController();
   bool _submitting = false;
-  final List<File> _evidenceFiles = [];
+  final List<String> _evidencePaths = [];
   final _picker = ImagePicker();
 
   @override
@@ -30,9 +30,10 @@ class _ReportFraudScreenState extends ConsumerState<ReportFraudScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    if (kIsWeb) return;
     final image = await _picker.pickImage(source: source, imageQuality: 80);
     if (image != null) {
-      setState(() => _evidenceFiles.add(File(image.path)));
+      setState(() => _evidencePaths.add(image.path));
     }
   }
 
@@ -46,16 +47,32 @@ class _ReportFraudScreenState extends ConsumerState<ReportFraudScreen> {
       final repo = ref.read(trustScoreRepositoryProvider);
       switch (_selectedType) {
         case 'CALL':
-          await repo.reportCall(_numberController.text, '', notes: _detailsController.text);
+          await repo.reportCall({
+            'phone_number': _numberController.text,
+            'notes': _detailsController.text,
+            'type': 'CALL',
+          });
           break;
         case 'SMS':
-          await repo.reportSms(_numberController.text, _detailsController.text);
+          await repo.reportSms({
+            'sender': _numberController.text,
+            'message': _detailsController.text,
+            'type': 'SMS',
+          });
           break;
         case 'WHATSAPP':
-          await repo.reportWhatsapp(_numberController.text, _detailsController.text);
+          await repo.reportWhatsapp({
+            'sender': _numberController.text,
+            'message': _detailsController.text,
+            'type': 'WHATSAPP',
+          });
           break;
         default:
-          await repo.reportCall(_numberController.text, '', notes: _detailsController.text);
+          await repo.reportCall({
+            'phone_number': _numberController.text,
+            'notes': _detailsController.text,
+            'type': _selectedType ?? 'CALL',
+          });
       }
       if (mounted) context.go('/report-submitted');
     } catch (e) {
@@ -96,13 +113,13 @@ class _ReportFraudScreenState extends ConsumerState<ReportFraudScreen> {
           _evidenceButton(Icons.photo_library, 'Gallery', () => _pickImage(ImageSource.gallery)),
           _evidenceButton(Icons.mic, 'Record', () {}),
         ]),
-        if (_evidenceFiles.isNotEmpty) ...[
+        if (_evidencePaths.isNotEmpty) ...[
           const SizedBox(height: 12),
           SizedBox(height: 60, child: ListView.builder(
-            scrollDirection: Axis.horizontal, itemCount: _evidenceFiles.length,
+            scrollDirection: Axis.horizontal, itemCount: _evidencePaths.length,
             itemBuilder: (_, i) => Stack(children: [
               Container(width: 60, height: 60, margin: const EdgeInsets.only(right: 8), decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: AppTheme.borderColor), child: const Icon(Icons.image, color: AppTheme.textSecondary)),
-              Positioned(top: -4, right: 2, child: GestureDetector(onTap: () => setState(() => _evidenceFiles.removeAt(i)), child: Container(width: 20, height: 20, decoration: const BoxDecoration(color: AppTheme.dangerRed, shape: BoxShape.circle), child: const Icon(Icons.close, size: 12, color: Colors.white)))),
+              Positioned(top: -4, right: 2, child: GestureDetector(onTap: () => setState(() => _evidencePaths.removeAt(i)), child: Container(width: 20, height: 20, decoration: const BoxDecoration(color: AppTheme.dangerRed, shape: BoxShape.circle), child: const Icon(Icons.close, size: 12, color: Colors.white)))),
             ]),
           )),
         ],

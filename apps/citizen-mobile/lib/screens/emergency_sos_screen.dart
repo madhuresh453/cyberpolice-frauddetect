@@ -90,7 +90,11 @@ class _EmergencySosScreenState extends ConsumerState<EmergencySosScreen> with Si
       final location = _currentPosition != null
           ? {'latitude': _currentPosition!.latitude, 'longitude': _currentPosition!.longitude}
           : null;
-      await repo.sendEmergencySos(location: location, message: 'SOS Emergency - Immediate assistance needed');
+      await repo.sendEmergencySos({
+        'location': location,
+        'message': 'SOS Emergency - Immediate assistance needed',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
       _logEvidence('SOS sent', 'Emergency alert delivered');
       setState(() {
         _sent = true;

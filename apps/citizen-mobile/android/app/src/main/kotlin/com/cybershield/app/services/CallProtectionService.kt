@@ -68,13 +68,12 @@ class CallProtectionService : Service() {
     }
 
     private fun buildNotification(text: String): Notification {
-        val pendingIntent = PendingIntent.getActivity(this, 0,
-            Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
+       
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("CyberShield AI")
             .setContentText(text)
-            .setSmallIcon(android.R.drawable.ic_dialog_phone)
-            .setContentIntent(pendingIntent)
+            
+            
             .setOngoing(true)
             .build()
     }
