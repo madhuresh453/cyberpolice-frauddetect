@@ -1,29 +1,54 @@
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
+import 'package:go_router/go_router.dart';
+import '../core/app_theme.dart';
+import '../core/widgets.dart';
 
 class FakeApkScreen extends StatelessWidget {
   const FakeApkScreen({super.key});
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppTheme.background, appBar: AppBar(title: const Text('APK Scanner')),
-    body: ListView(padding: const EdgeInsets.all(16), children: [
-      Container(decoration: AppTheme.neonBorder(color: AppTheme.warningOrange), padding: const EdgeInsets.all(20), child: const Column(children: [
-        Icon(Icons.android, size: 48, color: AppTheme.warningOrange), SizedBox(height: 12),
-        Text('App Scanner Active', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-        Text('Scanning installed applications', style: TextStyle(color: AppTheme.textSecondary)),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.cyberBlack,
+      appBar: AppBar(title: const Text('Fake APK Detection')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
+          const Icon(Icons.android, size: 48, color: AppTheme.dangerRed),
+          const SizedBox(height: 12),
+          const Text('Fake APK Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
+          const SizedBox(height: 8),
+          const Text('This app is attempting to install malware on your device', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+        ])),
+        const SizedBox(height: 20),
+        _apk('SP61 Bank App', 'Fake banking APK', '85%', AppTheme.dangerRed),
+        _apk('UPI Pay Plus', 'Fake UPI transaction app', '90%', AppTheme.dangerRed),
+        _apk('WhatsApp Mod', 'Fake WhatsApp application', '70%', AppTheme.warningOrange),
+        const SizedBox(height: 20),
+        CyberCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('How to stay safe', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+          const SizedBox(height: 12),
+          _tip('Always install from Play Store only'),
+          _tip('Enable Google Play Protect'),
+          _tip('Never accept APKs from unknown sources'),
+          _tip('Check app permissions carefully'),
+        ])),
+        const SizedBox(height: 20),
+        CyberButton(label: 'Report Fake App', icon: Icons.report, color: AppTheme.dangerRed, onPressed: () => context.go('/report')),
+      ]),
+    );
+  }
+  Widget _apk(String name, String desc, String risk, Color color) => Container(
+    margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(color: AppTheme.cardBg, borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: 0.3))),
+    child: Row(children: [
+      Container(width: 44, height: 44, decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.android, color: color, size: 20)),
+      const SizedBox(width: 14),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+        Text(desc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
       ])),
-      const SizedBox(height: 20),
-      SizedBox(width: double.infinity, child: ElevatedButton.icon(onPressed: () {}, icon: const Icon(Icons.security), label: const Text('Scan All Apps'))),
-      const SizedBox(height: 16),
-      Container(decoration: AppTheme.glassCard(), padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Detected Threats', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 12),
-        _appItem('Photo Editor Pro', 'Malware detected', AppTheme.dangerRed),
-        _appItem('Fast Cleaner', 'Suspicious permissions', AppTheme.warningOrange),
-        _appItem('WhatsApp', 'Verified', AppTheme.successGreen),
-      ])),
-    ]),
-  );
-  Widget _appItem(String name, String status, Color color) => Container(margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: AppTheme.cardBackground, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.borderColor)), child: Row(children: [
-    Icon(Icons.android, color: color, size: 20), const SizedBox(width: 10), Expanded(child: Text(name, style: const TextStyle(color: AppTheme.textPrimary))), Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)), child: Text(status, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600))),
+      StatusBadge(label: risk, color: color),
+    ]));
+  Widget _tip(String text) => Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
+    const Icon(Icons.check_circle, size: 16, color: AppTheme.safeGreen), const SizedBox(width: 8), Expanded(child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white))),
   ]));
 }

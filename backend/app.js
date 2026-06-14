@@ -708,6 +708,15 @@ export function createApp() {
   app.use("/api/v1/isp", ispRoutes);
   app.use("/api/v1/government", governmentRoutes);
 
+  // ===== ENHANCED CITIZEN API ENDPOINTS (new service-based routes) =====
+  // Import and mount the enhanced citizen routes
+  import("./services/citizen.routes.js").then(({ default: enhancedCitizenRoutes }) => {
+    app.use("/api/v2/citizen", enhancedCitizenRoutes);
+    console.log("Enhanced citizen API v2 routes mounted at /api/v2/citizen");
+  }).catch(err => {
+    console.log("Enhanced citizen API routes not available:", err.message);
+  });
+
   // ===== ERROR HANDLER (must be last) =====
   app.use(errorHandler);
 

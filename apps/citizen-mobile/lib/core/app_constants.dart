@@ -1,0 +1,22 @@
+class AppConstants {
+  static const String appName = 'CyberShield AI';
+  static const String appTagline = 'AI Powered Scam Protection';
+  static const String appFooter = 'Building a Safer India Together';
+  static const String apiBaseUrl = 'http://localhost:3000/api/v2';
+  static const String apiV1BaseUrl = 'http://localhost:3000/api/v1';
+}
+
+class StorageKeys {
+  static const String jwtToken = 'jwt_token';
+  static const String refreshToken = 'refresh_token';
+  static const String userId = 'user_id';
+  static const String userProfile = 'user_profile';
+  static const String onboardingComplete = 'onboarding_complete';
+  static const String permissionsGranted = 'permissions_granted';
+  static const String blockedNumbers = 'blocked_numbers';
+  static const String emergencyContacts = 'emergency_contacts';
+  static const String protectionEnabled = 'protection_enabled';
+  static const String themeMode = 'theme_mode';
+  static const String biometricEnabled = 'biometric_enabled';
+  static const String deviceId = 'device_id';
+}

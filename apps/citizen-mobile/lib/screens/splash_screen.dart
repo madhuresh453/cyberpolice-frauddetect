@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
-import '../themes/app_theme.dart';
-import '../providers/auth_provider.dart';
+import '../core/app_theme.dart';
 
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen>
-    with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
+  late Animation<double> _glowAnim;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2000));
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2500));
+    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _scaleAnim = Tween<double>(begin: 0.3, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    _glowAnim = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
     _controller.forward();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) ref.read(authProvider.notifier).init();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) context.go('/onboarding/1');
     });
   }
 
@@ -37,88 +36,94 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AuthState>(authProvider, (prev, next) {
-      if (next.status == AuthStatus.authenticated || next.status == AuthStatus.unauthenticated) {
-        if (mounted) context.go(next.status == AuthStatus.authenticated ? '/home' : '/onboarding');
-      }
-    });
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.cyberBlack,
       body: AnimatedBuilder(
         animation: _controller,
-        builder: (context, child) => Stack(
-          children: [
-            // Animated background gradient
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    colors: [AppTheme.primaryBlue.withValues(alpha: 0.15 * _controller.value), AppTheme.background],
-                    radius: 1.5,
+        builder: (context, child) => Container(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              colors: [AppTheme.cyberBlue.withValues(alpha: 0.12 * _glowAnim.value), AppTheme.cyberBlack],
+              radius: 1.5,
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Animated particles simulation
+              ...List.generate(20, (i) => Positioned(
+                left: (i * 37.0) % MediaQuery.of(context).size.width,
+                top: (i * 53.0) % MediaQuery.of(context).size.height,
+                child: Opacity(
+                  opacity: 0.3 + (0.7 * ((i % 5) / 5.0)),
+                  child: Container(
+                    width: 2, height: 2,
+                    decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.cyberBlue),
+                  ),
+                ),
+              )),
+              // Center shield
+              Center(
+                child: Transform.scale(
+                  scale: _scaleAnim.value,
+                  child: Opacity(
+                    opacity: _fadeAnim.value,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Shield with hexagon
+                        Container(
+                          width: 120, height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppTheme.cyberBlue.withValues(alpha: 0.8), width: 2),
+                            boxShadow: [
+                              BoxShadow(color: AppTheme.cyberBlue.withValues(alpha: 0.3 * _glowAnim.value), blurRadius: 40, spreadRadius: 10),
+                            ],
+                          ),
+                          child: Container(
+                            margin: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppTheme.cyberBlue.withValues(alpha: 0.3), width: 1),
+                            ),
+                            child: const Icon(Icons.shield_outlined, size: 48, color: AppTheme.cyberBlue),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // App name - gradient text
+                        ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [AppTheme.cyberBlue, Color(0xFF0088FF)],
+                          ).createShader(bounds),
+                          child: const Text('CyberShield AI', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2)),
+                        ),
+                        const SizedBox(height: 8),
+                        Text('AI Powered Scam Protection', style: TextStyle(fontSize: 14, color: AppTheme.cyberBlue.withValues(alpha: 0.8), letterSpacing: 1)),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Shield glow effect
-            Positioned(
-              top: MediaQuery.of(context).size.height * 0.15,
-              left: 0, right: 0,
-              child: Transform.scale(
-                scale: _scaleAnimation.value,
+              // Footer
+              Positioned(
+                bottom: 60, left: 0, right: 0,
                 child: Opacity(
-                  opacity: _fadeAnimation.value,
+                  opacity: _fadeAnim.value,
                   child: Column(
                     children: [
-                      Container(
-                        width: 120, height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                        ),
-                        child: const Icon(Icons.shield_outlined, size: 60, color: AppTheme.primaryBlue),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text('CYBERSHIELD', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 4, color: AppTheme.primaryBlue)),
                       const SizedBox(height: 8),
-                      const Text('AI', style: TextStyle(fontSize: 20, color: AppTheme.primaryBlue, fontWeight: FontWeight.w900)),
+                      Text('Building a Safer India Together', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.7))),
+                      const SizedBox(height: 20),
+                      SizedBox(width: 24, height: 24, child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.cyberBlue.withValues(alpha: 0.6)),
+                      )),
                     ],
                   ),
                 ),
               ),
-            ),
-            // Tagline
-            Positioned(
-              bottom: MediaQuery.of(context).size.height * 0.12,
-              left: 0, right: 0,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 30,
-                      child: DefaultTextStyle(
-                        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-                        child: AnimatedTextKit(
-                          animatedTexts: [TypewriterAnimatedText('Be Aware. Be Safe.', speed: const Duration(milliseconds: 100))],
-                          repeatForever: false, isRepeatingAnimation: false,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Icon(Icons.local_police, size: 16, color: AppTheme.textSecondary), SizedBox(width: 8), Text('In partnership with Police', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary))],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: MediaQuery.of(context).size.height * 0.05,
-              left: 0, right: 0,
-              child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue.withValues(alpha: 0.6))))),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

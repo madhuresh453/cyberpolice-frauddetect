@@ -1,28 +1,50 @@
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
+import '../core/app_theme.dart';
+import '../core/widgets.dart';
 
 class FraudHeatmapScreen extends StatelessWidget {
   const FraudHeatmapScreen({super.key});
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppTheme.background, appBar: AppBar(title: const Text('Fraud Heatmap')),
-    body: Column(children: [
-      Container(height: 200, margin: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppTheme.cardBackground, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppTheme.borderColor)), child: const Center(child: Text('Mapbox India Map', style: TextStyle(color: AppTheme.textSecondary)))),
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
-        _chip('All India'), _chip('Maharashtra'), _chip('Delhi'), _chip('Karnataka'),
-      ])),
-      Expanded(child: ListView(padding: const EdgeInsets.all(16), children: [
-        _locationItem('Mumbai', '1,234 cases', AppTheme.dangerRed),
-        _locationItem('Delhi', '987 cases', AppTheme.dangerRed),
-        _locationItem('Bangalore', '756 cases', AppTheme.warningOrange),
-        _locationItem('Pune', '543 cases', AppTheme.warningOrange),
-        _locationItem('Chennai', '432 cases', AppTheme.warningOrange),
-        _locationItem('Hyderabad', '321 cases', AppTheme.successGreen),
-      ])),
-    ]),
-  );
-  Widget _chip(String label) => Container(margin: const EdgeInsets.only(right: 8), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: AppTheme.cardBackground, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.borderColor)), child: Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary)));
-  Widget _locationItem(String city, String cases, Color color) => Container(margin: const EdgeInsets.only(bottom: 8), decoration: AppTheme.glassCard(), padding: const EdgeInsets.all(12), child: Row(children: [
-    Icon(Icons.location_on, color: color, size: 20), const SizedBox(width: 12), Expanded(child: Text(city, style: const TextStyle(color: AppTheme.textPrimary))), Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Text(cases, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12))),
-  ]));
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.cyberBlack,
+      appBar: AppBar(title: const Text('Fraud Heatmap')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        const Text('Active Scam Hotspots', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+        const SizedBox(height: 12),
+        Container(height: 300, decoration: BoxDecoration(color: AppTheme.cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppTheme.borderColor)),
+          child: Stack(children: [
+            Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(Icons.map_outlined, size: 64, color: AppTheme.cyberBlue.withValues(alpha: 0.3)),
+              const SizedBox(height: 16),
+              Text('Live Map View', style: TextStyle(fontSize: 16, color: AppTheme.textSecondary.withValues(alpha: 0.8))),
+              const SizedBox(height: 8),
+              Text('Mumbai, Delhi, Bangalore, Hyderabad', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.6))),
+            ])),
+            Positioned(top: 10, left: 10, child: StatusBadge(label: 'LIVE', color: AppTheme.dangerRed)),
+          ])),
+        const SizedBox(height: 20),
+        _hotspot('Mumbai', 1250, 'High'), _hotspot('Delhi', 980, 'High'),
+        _hotspot('Bangalore', 650, 'Medium'), _hotspot('Hyderabad', 420, 'Medium'),
+        _hotspot('Chennai', 310, 'Low'), _hotspot('Kolkata', 280, 'Low'),
+      ]),
+    );
+  }
+  Widget _hotspot(String city, int count, String level) {
+    final color = level == 'High' ? AppTheme.dangerRed : level == 'Medium' ? AppTheme.warningOrange : AppTheme.safeGreen;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: AppTheme.cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.borderColor)),
+      child: Row(children: [
+        Icon(Icons.location_on, color: color, size: 20), const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(city, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+          Text('High Risk Reports', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+        ])),
+        Column(children: [
+          Text('$count', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+          Text('reports', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+        ]),
+      ]));
+  }
 }

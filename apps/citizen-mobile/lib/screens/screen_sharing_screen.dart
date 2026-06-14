@@ -1,36 +1,55 @@
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
+import 'package:go_router/go_router.dart';
+import '../core/app_theme.dart';
+import '../core/widgets.dart';
 
 class ScreenSharingScreen extends StatelessWidget {
   const ScreenSharingScreen({super.key});
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppTheme.background, appBar: AppBar(title: const Text('Screen Sharing Detection')),
-    body: ListView(padding: const EdgeInsets.all(16), children: [
-      Container(decoration: AppTheme.neonBorder(color: AppTheme.warningOrange), padding: const EdgeInsets.all(20), child: const Column(children: [
-        Icon(Icons.monitor, size: 48, color: AppTheme.warningOrange), SizedBox(height: 12),
-        Text('Detection Active', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-        Text('Monitoring for screen sharing apps', style: TextStyle(color: AppTheme.textSecondary)),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.cyberBlack,
+      appBar: AppBar(title: const Text('Screen Sharing Detection')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
+          const Icon(Icons.screen_share, size: 48, color: AppTheme.dangerRed),
+          const SizedBox(height: 12),
+          const Text('Screen Sharing Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
+          const SizedBox(height: 8),
+          const Text('An app is attempting to capture your screen', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+        ])),
+        const SizedBox(height: 20),
+        const Text('Active Screen Sharing Sessions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+        const SizedBox(height: 12),
+        _session('AnyDesk', 'Screen captured for 2 min 15 sec', AppTheme.dangerRed, 'Active'),
+        _session('TeamViewer', 'Attempted to install', AppTheme.warningOrange, 'Blocked'),
+        _session('Zoho Assist', 'Session ended 5 min ago', AppTheme.safeGreen, 'Ended'),
+        const SizedBox(height: 20),
+        CyberCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Protection Tips', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+          const SizedBox(height: 8),
+          _tip('Never share your screen with strangers'),
+          _tip('Report any suspicious remote access apps'),
+          _tip('Disable unknown app permissions'),
+        ])),
+        const SizedBox(height: 20),
+        CyberButton(label: 'Block All Remote Access', icon: Icons.block, color: AppTheme.dangerRed, onPressed: () => context.go('/remote-access')),
+      ]),
+    );
+  }
+  Widget _session(String name, String desc, Color color, String label) => Container(
+    margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(color: AppTheme.cardBg, borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: 0.3))),
+    child: Row(children: [
+      Container(width: 44, height: 44, decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.screen_share, color: color, size: 20)),
+      const SizedBox(width: 14),
+      Expanded(child: Column(children: [
+        Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+        Text(desc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
       ])),
-      const SizedBox(height: 20),
-      Container(decoration: AppTheme.glassCard(), padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Detected Apps', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 12),
-        _appItem('AnyDesk', 'Not detected', AppTheme.successGreen),
-        _appItem('TeamViewer', 'Not detected', AppTheme.successGreen),
-        _appItem('RustDesk', 'BLOCKED', AppTheme.dangerRed),
-        _appItem('Screen Meet', 'Not detected', AppTheme.successGreen),
-      ])),
-      const SizedBox(height: 20),
-      Container(decoration: AppTheme.glassCard(), padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Protection Settings', style: Theme.of(context).textTheme.titleLarge),
-        SwitchListTile(title: const Text('Auto-detect screen sharing'), value: true, onChanged: (v) {}, activeThumbColor: AppTheme.primaryBlue),
-        SwitchListTile(title: const Text('Alert on overlay apps'), value: true, onChanged: (v) {}, activeThumbColor: AppTheme.primaryBlue),
-        SwitchListTile(title: const Text('Block remote control apps'), value: true, onChanged: (v) {}, activeThumbColor: AppTheme.primaryBlue),
-      ])),
-    ]),
-  );
-  Widget _appItem(String name, String status, Color color) => Container(margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: AppTheme.cardBackground, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.borderColor)), child: Row(children: [
-    Container(width: 36, height: 36, decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Icon(Icons.apps, color: color, size: 18)),
-    const SizedBox(width: 10), Expanded(child: Text(name, style: const TextStyle(color: AppTheme.textPrimary))), Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)), child: Text(status, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600))),
+      StatusBadge(label: label, color: color),
+    ]));
+  Widget _tip(String text) => Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
+    const Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.warningOrange), const SizedBox(width: 8), Expanded(child: Text(text, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary))),
   ]));
 }
