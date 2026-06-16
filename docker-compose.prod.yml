@@ -144,7 +144,7 @@ services:
     depends_on:
       - express-backend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:5000/api/v1
+      NEXT_PUBLIC_API_URL: https://api.uni6ctf.online/api/v1
       NODE_ENV: production
     networks:
       - raksaar-network

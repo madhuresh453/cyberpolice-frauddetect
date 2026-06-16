@@ -8,7 +8,7 @@ export class FraudGraphExplorer {
 
   async initialize() {
     if (this.initialized) return;
-    const neo4jUrl = process.env.NEO4J_URI || 'bolt://localhost:7687';
+    const neo4jUrl = process.env.NEO4J_URI || (process.env.NODE_ENV === "production" ? 'bolt://neo4j:7687' : 'bolt://localhost:7687');
     const neo4jUser = process.env.NEO4J_USER || 'neo4j';
     const neo4jPassword = process.env.NEO4J_PASSWORD || 'password';
     this.driver = neo4j.driver(neo4jUrl, neo4j.auth.basic(neo4jUser, neo4jPassword));

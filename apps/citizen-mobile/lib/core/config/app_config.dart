@@ -13,7 +13,7 @@ class AppConfig {
   // ─── Production URLs ───
   static const String _prodApiBaseUrl = 'https://api.uni6ctf.online';
   static const String _prodAiBaseUrl = 'https://api.uni6ctf.online';
-  static const String _prodAdminUrl = 'https://admin.uni6ctf.online';
+  static const String _prodAdminUrl = 'https://police.uni6ctf.online';
   static const String _prodAppUrl = 'https://app.uni6ctf.online';
   static const String _prodWebSocketUrl = 'wss://api.uni6ctf.online/ws';
 

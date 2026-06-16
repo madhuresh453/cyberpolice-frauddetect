@@ -12,7 +12,8 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 // AI Gateway URL - points to the Python AI Gateway service
-const AI_GATEWAY_URL = process.env.AI_GATEWAY_URL || "http://localhost:8000";
+// Uses environment variable; falls back to production URL for release builds
+const AI_GATEWAY_URL = process.env.AI_GATEWAY_URL || (process.env.NODE_ENV === "production" ? "https://api.uni6ctf.online" : "http://localhost:8000");
 
 /**
  * Helper to call AI Gateway

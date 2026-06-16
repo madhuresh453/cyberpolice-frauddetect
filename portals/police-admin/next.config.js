@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   images: {
-    domains: ['localhost', 'api.mapbox.com'],
+    domains: ['api.mapbox.com'],
   },
   experimental: {
     serverActions: {

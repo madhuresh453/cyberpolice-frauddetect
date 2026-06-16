@@ -32,9 +32,10 @@ const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:5000",
   "http://localhost:8080",
-  "https://raksaar.gov.in",
-  "https://police.raksaar.gov.in",
-  "https://app.raksaar.gov.in",
+  "http://localhost:3001",
+  "https://app.uni6ctf.online",
+  "https://police.uni6ctf.online",
+  "https://api.uni6ctf.online",
 ];
 
 export const corsMiddleware = cors({
