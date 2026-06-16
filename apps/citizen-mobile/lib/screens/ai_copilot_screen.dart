@@ -33,7 +33,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen> {
   void initState() {
     super.initState();
     _addBotMessage(
-      'Namaste! 🙏 I am your AI Copilot. I can help you with fraud protection, safety advice, and emergency assistance. How can I help you today?',
+          'Namaste! 🙏 I am your RAKSAAR AI Copilot. I can help you with fraud protection, safety advice, and emergency assistance. How can I help you today?',
     );
   }
 
@@ -85,7 +85,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen> {
           '2. Do NOT press any numbers\n'
           '3. Hang up immediately\n'
           '4. Block the number\n'
-          '5. Report to CyberShield\n\n'
+          '5. Report to RAKSAAR\n\n'
           'Your call protection is currently ACTIVE. All incoming calls are being screened.';
     } else if (lowerText.contains('otp') || lowerText.contains('shared')) {
       response = '⚠️ **OTP Shared - Immediate Action Required**\n\n'
@@ -93,14 +93,14 @@ class _AiCopilotScreenState extends State<AiCopilotScreen> {
           '1. Immediately call your bank to freeze accounts\n'
           '2. Change all passwords\n'
           '3. File a complaint on 1930\n'
-          '4. Report through CyberShield Emergency\n\n'
+          '4. Report through RAKSAAR Emergency\n\n'
           'I can help you file a report right now. Would you like to proceed?';
     } else if (lowerText.contains('upi') || lowerText.contains('payment')) {
       response = '💳 **UPI Fraud Protection**\n\n'
           'To stay safe from UPI fraud:\n'
           '• Never share your UPI PIN\n'
           '• Verify merchant before payment\n'
-          '• Use UPI Protection in CyberShield\n'
+          '• Use UPI Protection in RAKSAAR\n'
           '• Enable transaction limits\n\n'
           'If you\'ve lost money, use the Emergency SOS immediately!';
     } else if (lowerText.contains('deepfake')) {
@@ -108,7 +108,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen> {
           'Deepfakes use AI to create fake videos/audio. To protect yourself:\n'
           '• Be skeptical of urgent requests from known contacts\n'
           '• Verify through another communication channel\n'
-          '• Use our Deepfake Detection tool to analyze media\n'
+          '• Use RAKSAAR Deepfake Detection to analyze media\n'
           '• Look for unnatural blinking or lip movements\n\n'
           'Would you like me to guide you through the detection process?';
     } else if (lowerText.contains('parent') || lowerText.contains('senior') || lowerText.contains('family')) {
@@ -119,7 +119,7 @@ class _AiCopilotScreenState extends State<AiCopilotScreen> {
           '• **Family Alerts**: Real-time scam alerts to all members\n'
           '• **Shared Protection**: Monitor family members\' safety\n'
           '• **Emergency Alert**: One-tap SOS for family\n\n'
-          'Enable Family Protection from the home screen!';
+          'Enable Family Protection from the RAKSAAR home screen!';
     } else {
       response = '🤖 **I\'m here to help!**\n\n'
           'I can assist you with:\n'

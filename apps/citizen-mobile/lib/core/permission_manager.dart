@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-/// Government-grade permission manager for CyberShield AI (RAKSAAR)
+/// Government-grade permission manager for RAKSAAR – Cyber Safety OS
 ///
 /// Permission Policy (v2.0):
 /// ─────────────────────────────────────────────
@@ -214,8 +214,8 @@ class RaksaarPermissionManager {
         title: const Text('Permission Required'),
         content: Text(
           '${_getPermissionTitle(p)} permission is permanently denied.\n\n'
-          'CyberShield requires this to protect you from scams.\n\n'
-          'Please enable it in Settings → Apps → CyberShield → Permissions → '
+          'RAKSAAR requires this to protect you from scams.\n\n'
+          'Please enable it in Settings → Apps → RAKSAAR → Permissions → '
           '${_getPermissionTitle(p)}',
         ),
         actions: [

@@ -2,7 +2,7 @@ import '../config/environment.dart';
 import '../core/config/app_config.dart';
 
 class AppConstants {
-  static const String appName = 'CYBERSHIELD AI';
+  static const String appName = 'RAKSAAR';
   static String get apiBaseUrl => Environment.apiBaseUrl;
   static String get wsBaseUrl => Environment.wsBaseUrl;
   static String get socketUrl => Environment.socketUrl;

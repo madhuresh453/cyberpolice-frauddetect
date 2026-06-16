@@ -20,7 +20,7 @@ class Onboarding1Screen extends StatelessWidget {
               const SizedBox(height: 40),
               ShaderMask(
                 shaderCallback: (bounds) => const LinearGradient(colors: [AppTheme.cyberBlue, Color(0xFF0088FF)]).createShader(bounds),
-                child: const Text('Welcome to\nCyberShield AI', textAlign: TextAlign.center,
+                child: const Text('Welcome to\nRAKSAAR', textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3)),
               ),
               const SizedBox(height: 12),

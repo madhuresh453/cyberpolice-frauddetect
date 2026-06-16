@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/settings_provider.dart';
 import '../../core/permission_manager.dart';
+import '../../core/config/app_config.dart';
 
-class SettingsCenter extends ConsumerWidget {
-  const SettingsCenter({super.key});
+/// Profile Tab – Citizen Profile, Settings, Permissions, DPDP Consent
+class ProfileTabScreen extends ConsumerWidget {
+  const ProfileTabScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -13,7 +17,7 @@ class SettingsCenter extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('Profile'),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -24,7 +28,11 @@ class SettingsCenter extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Security Section
+          // Profile Card
+          _buildProfileCard(theme),
+          const SizedBox(height: 20),
+
+          // Settings Section
           _sectionHeader('Security', Icons.security, theme),
           _settingsTile(
             icon: Icons.fingerprint,
@@ -51,7 +59,7 @@ class SettingsCenter extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Notifications Section
+          // Notifications
           _sectionHeader('Notifications', Icons.notifications, theme),
           _settingsTile(
             icon: Icons.warning_amber,
@@ -78,7 +86,7 @@ class SettingsCenter extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Appearance Section
+          // Appearance
           _sectionHeader('Appearance', Icons.palette, theme),
           _settingsTile(
             icon: Icons.dark_mode,
@@ -94,7 +102,65 @@ class SettingsCenter extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Emergency Section
+          // Permissions
+          _sectionHeader('Permissions', Icons.verified_user, theme),
+          _settingsTile(
+            icon: Icons.shield,
+            title: 'Manage Permissions',
+            subtitle: 'View and request permissions',
+            trailing: const Icon(Icons.chevron_right),
+            theme: theme,
+            onTap: () => _showPermissionStatus(context),
+          ),
+
+          const Divider(height: 32),
+
+          // Data & Privacy
+          _sectionHeader('Data & Privacy', Icons.storage, theme),
+          _settingsTile(
+            icon: Icons.file_download,
+            title: 'Export Reports',
+            subtitle: 'Download fraud reports as PDF',
+            trailing: Switch(
+              value: settings.exportReports,
+              onChanged: (_) => ref.read(settingsProvider.notifier).toggleExportReports(),
+              activeColor: theme.colorScheme.primary,
+            ),
+            theme: theme,
+          ),
+          _settingsTile(
+            icon: Icons.privacy_tip,
+            title: 'DPDP Consent',
+            subtitle: 'Manage data protection consent',
+            trailing: const Icon(Icons.chevron_right),
+            theme: theme,
+            onTap: () => _showDPDPConsent(context),
+          ),
+
+          const Divider(height: 32),
+
+          // Account
+          _sectionHeader('Account', Icons.person, theme),
+          _settingsTile(
+            icon: Icons.language,
+            title: 'Language',
+            subtitle: 'English',
+            trailing: const Icon(Icons.chevron_right),
+            theme: theme,
+            onTap: () => _showLanguagePicker(context),
+          ),
+          _settingsTile(
+            icon: Icons.lock,
+            title: 'Change Password',
+            subtitle: 'Update your password',
+            trailing: const Icon(Icons.chevron_right),
+            theme: theme,
+            onTap: () {},
+          ),
+
+          const Divider(height: 32),
+
+          // Emergency
           _sectionHeader('Emergency', Icons.warning, theme),
           _settingsTile(
             icon: Icons.sos,
@@ -110,34 +176,32 @@ class SettingsCenter extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Permissions Section
-          _sectionHeader('Permissions', Icons.verified_user, theme),
+          // App Info
+          _sectionHeader('App Info', Icons.info, theme),
           _settingsTile(
-            icon: Icons.shield,
-            title: 'Manage Permissions',
-            subtitle: 'View and request permissions',
-            trailing: const Icon(Icons.chevron_right),
-            theme: theme,
-            onTap: () => _showPermissionStatus(context),
-          ),
-
-          const Divider(height: 32),
-
-          // Account & Data
-          _sectionHeader('Data', Icons.storage, theme),
-          _settingsTile(
-            icon: Icons.file_download,
-            title: 'Export Reports',
-            subtitle: 'Download fraud reports as PDF',
-            trailing: Switch(
-              value: settings.exportReports,
-              onChanged: (_) => ref.read(settingsProvider.notifier).toggleExportReports(),
-              activeColor: theme.colorScheme.primary,
-            ),
+            icon: Icons.update,
+            title: 'Version',
+            subtitle: '${AppConfig.appVersion} (${AppConfig.buildNumber})',
             theme: theme,
           ),
+          _settingsTile(
+            icon: Icons.description,
+            title: 'Terms of Service',
+            subtitle: 'View terms and conditions',
+            trailing: const Icon(Icons.open_in_new, size: 16),
+            theme: theme,
+            onTap: () => _launchUrl('${AppConfig.appUrl}/terms'),
+          ),
+          _settingsTile(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Privacy Policy',
+            subtitle: 'View privacy policy',
+            trailing: const Icon(Icons.open_in_new, size: 16),
+            theme: theme,
+            onTap: () => _launchUrl('${AppConfig.appUrl}/privacy'),
+          ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
           // Logout
           SizedBox(
@@ -154,6 +218,50 @@ class SettingsCenter extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileCard(ThemeData theme) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF1A73E8), Color(0xFF0088FF)]),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.person, color: Colors.white, size: 30),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Citizen', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('citizen@raksaar.gov.in', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text('Verified Citizen', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit, size: 20),
+              onPressed: () {},
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -207,17 +315,30 @@ class SettingsCenter extends ConsumerWidget {
               children: [
                 const Text('Permission Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
+                _permRow('Phone', p['callLogs']),
                 _permRow('Call Logs', p['callLogs']),
                 _permRow('Contacts', p['contacts']),
-                _permRow('Microphone', p['microphone']),
                 _permRow('SMS', p['sms']),
                 _permRow('Camera', p['camera']),
+                _permRow('Microphone', p['microphone']),
                 _permRow('Notifications', p['notifications']),
                 const Divider(height: 16),
                 Text('Optional', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                _permRow('Location', p['location']),
                 _permRow('Overlay', p['overlay']),
                 _permRow('Accessibility', p['accessibility']),
                 _permRow('Battery', p['batteryOptimization']),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      RaksaarPermissionManager.requestMandatoryPermissions(context: context);
+                    },
+                    child: const Text('Request All Permissions'),
+                  ),
+                ),
               ],
             ),
           );
@@ -243,11 +364,60 @@ class SettingsCenter extends ConsumerWidget {
     );
   }
 
+  void _showDPDPConsent(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('DPDP 2023 Consent'),
+        content: const SingleChildScrollView(
+          child: Text(
+            'RAKSAAR collects and processes personal data in accordance with the Digital Personal Data Protection Act, 2023.\n\n'
+            'Data collected:\n'
+            '• Phone numbers for fraud detection\n'
+            '• SMS content for scam analysis\n'
+            '• Call logs for threat detection\n'
+            '• Location for emergency services\n\n'
+            'Your data is encrypted and stored securely. '
+            'You can export or delete your data at any time.\n\n'
+            'By continuing, you consent to data processing for cyber safety purposes.',
+            style: TextStyle(fontSize: 13, height: 1.5),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Decline')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('I Consent'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    final languages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Marathi', 'Bengali', 'Gujarati', 'Kannada', 'Punjabi', 'Malayalam'];
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text('Select Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          ...languages.map((lang) => ListTile(
+            title: Text(lang),
+            trailing: lang == 'English' ? const Icon(Icons.check, color: Colors.green) : null,
+            onTap: () => Navigator.pop(ctx),
+          )),
+        ],
+      ),
+    );
+  }
+
   void _showAbout(BuildContext context) {
     showAboutDialog(
       context: context,
       applicationName: 'RAKSAAR',
-      applicationVersion: '1.0.0',
+      applicationVersion: '${AppConfig.appVersion} (${AppConfig.buildNumber})',
       applicationIcon: const Icon(Icons.shield, size: 48, color: Colors.blue),
       children: [
         const Text('Cyber Safety Operating System\nA Government of India Initiative\nDPDP 2023 Compliant\n\nProtecting citizens from cyber fraud using AI.'),
@@ -271,5 +441,12 @@ class SettingsCenter extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }

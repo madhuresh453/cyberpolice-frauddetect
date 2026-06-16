@@ -8,6 +8,11 @@ import 'screens/home/home_dashboard.dart';
 import 'screens/monitor/monitor_center.dart';
 import 'screens/family/family_dashboard.dart';
 import 'screens/settings/settings_center.dart';
+import 'screens/protection/protection_tab_screen.dart';
+import 'screens/ai_investigator/ai_investigator_screen.dart';
+import 'screens/safety/safety_tab_screen.dart';
+import 'screens/intelligence/intelligence_tab_screen.dart';
+import 'screens/profile/profile_tab_screen.dart';
 
 class RaksaarApp extends ConsumerWidget {
   final List<String> startupErrors;
@@ -58,7 +63,6 @@ class _AppShellState extends ConsumerState<AppShell>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Show startup warnings (non-blocking)
     if (widget.startupErrors.isNotEmpty) {
       Future.microtask(() {
         if (mounted) setState(() => _showStartupWarning = true);
@@ -94,18 +98,20 @@ class _AppShellState extends ConsumerState<AppShell>
 
   @override
   Widget build(BuildContext context) {
+    // 6-tab RAKSAAR layout: Home, Protection, AI Investigator, Safety, Intelligence, Profile
     final screens = <Widget>[
       RaksaarHomeDashboard(startupErrors: widget.startupErrors),
-      const MonitorCenter(),
-      const FamilyDashboard(),
-      const SettingsCenter(),
+      const ProtectionTabScreen(),
+      const AiInvestigatorTabScreen(),
+      const SafetyTabScreen(),
+      const IntelligenceTabScreen(),
+      const ProfileTabScreen(),
     ];
 
     return Scaffold(
       body: Stack(
         children: [
           IndexedStack(index: _currentIndex, children: screens),
-          // Non-blocking startup warning banner
           if (_showStartupWarning && widget.startupErrors.isNotEmpty)
             Positioned(
               top: 0,
@@ -149,23 +155,33 @@ class _AppShellState extends ConsumerState<AppShell>
         backgroundColor: Theme.of(context).colorScheme.surface,
         indicatorColor:
             Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+        height: 68,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
+          NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home'),
           NavigationDestination(
               icon: Icon(Icons.shield_outlined),
               selectedIcon: Icon(Icons.shield),
               label: 'Protection'),
           NavigationDestination(
-              icon: Icon(Icons.radar_outlined),
-              selectedIcon: Icon(Icons.radar),
-              label: 'Monitor'),
+              icon: Icon(Icons.psychology_outlined),
+              selectedIcon: Icon(Icons.psychology),
+              label: 'AI Scan'),
           NavigationDestination(
-              icon: Icon(Icons.people_outlined),
-              selectedIcon: Icon(Icons.people),
-              label: 'Family'),
+              icon: Icon(Icons.emergency_outlined),
+              selectedIcon: Icon(Icons.emergency),
+              label: 'Safety'),
           NavigationDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: 'Settings'),
+              icon: Icon(Icons.insights_outlined),
+              selectedIcon: Icon(Icons.insights),
+              label: 'Intel'),
+          NavigationDestination(
+              icon: Icon(Icons.person_outlined),
+              selectedIcon: Icon(Icons.person),
+              label: 'Profile'),
         ],
       ),
     );

@@ -1,8 +1,8 @@
 import 'config/app_config.dart';
 
 class AppConstants {
-  static const String appName = 'CyberShield AI';
-  static const String appTagline = 'AI Powered Scam Protection';
+  static const String appName = 'RAKSAAR';
+  static const String appTagline = 'Cyber Safety Operating System';
   static const String appFooter = 'Building a Safer India Together';
   static String get apiBaseUrl => AppConfig.apiV2;
   static String get apiV1BaseUrl => AppConfig.apiV1;

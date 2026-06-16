@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/app_theme.dart';
+import '../core/config/app_config.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,6 +17,8 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _fadeAnim;
   late Animation<double> _scaleAnim;
   late Animation<double> _glowAnim;
+  Timer? _navigationTimer;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -31,12 +35,13 @@ class _SplashScreenState extends State<SplashScreen>
         curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
     _controller.forward();
 
-    // SAFETY: Navigate after animation completes OR timeout (3.5s max)
-    Future.delayed(const Duration(milliseconds: 3500), _navigateToNext);
+    // SAFETY: Hard timeout at 3 seconds – NEVER allow splash freeze
+    _navigationTimer = Timer(AppConfig.maxSplashDuration, _navigateToNext);
   }
 
   void _navigateToNext() {
-    if (!mounted) return;
+    if (_navigated || !mounted) return;
+    _navigated = true;
     try {
       context.go('/onboarding/1');
     } catch (e) {
@@ -44,13 +49,14 @@ class _SplashScreenState extends State<SplashScreen>
       try {
         context.go('/home');
       } catch (_) {
-        debugPrint('[Splash] All navigation failed — staying on splash');
+        debugPrint('[Splash] All navigation failed');
       }
     }
   }
 
   @override
   void dispose() {
+    _navigationTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -91,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              // Center shield
+              // Center shield + branding
               Center(
                 child: Transform.scale(
                   scale: _scaleAnim.value,
@@ -140,22 +146,22 @@ class _SplashScreenState extends State<SplashScreen>
                                 ],
                               ).createShader(bounds),
                           child: const Text(
-                            'CyberShield AI',
+                            'RAKSAAR',
                             style: TextStyle(
-                                fontSize: 32,
+                                fontSize: 36,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                letterSpacing: 2),
+                                letterSpacing: 4),
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'AI Powered Scam Protection',
+                          AppConfig.appTagline,
                           style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               color: AppTheme.cyberBlue
                                   .withValues(alpha: 0.8),
-                              letterSpacing: 1),
+                              letterSpacing: 1.5),
                         ),
                       ],
                     ),
@@ -171,11 +177,17 @@ class _SplashScreenState extends State<SplashScreen>
                   opacity: _fadeAnim.value,
                   child: Column(
                     children: [
-                      Text('Building a Safer India Together',
+                      Text('National Cyber Safety Platform',
                           style: TextStyle(
                               fontSize: 12,
                               color: AppTheme.textSecondary
                                   .withValues(alpha: 0.7))),
+                      const SizedBox(height: 4),
+                      Text('Government of India Initiative',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textSecondary
+                                  .withValues(alpha: 0.5))),
                       const SizedBox(height: 20),
                       SizedBox(
                         width: 24,

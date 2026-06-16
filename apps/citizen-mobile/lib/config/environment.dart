@@ -1,5 +1,4 @@
 import 'package:cybershield_citizen/core/config/app_config.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Environment {
   static String get apiBaseUrl => AppConfig.apiV1;
@@ -11,25 +10,26 @@ class Environment {
   static const Duration receiveTimeout = Duration(seconds: 20);
   static const Duration sendTimeout = Duration(seconds: 15);
 
-  // Feature flags
-  static bool get enableDeepfakeDetection => true;
-  static bool get enableCallRecording => true;
-  static bool get enableBackgroundService => true;
-  static bool get enableFamilyProtection => true;
-  static bool get enableOfflineVault => true;
-  static bool get enableAiCopilot => true;
-  static bool get enableLiveAlerts => true;
-  static bool get enableRealTimeSync => true;
-  static bool get enableBiometricAuth => true;
-  static bool get enableMFA => true;
+  // Feature flags (mirror AppConfig)
+  static bool get enableDeepfakeDetection => AppConfig.enableDeepfakeDetection;
+  static bool get enableCallRecording => AppConfig.enableCallRecording;
+  static bool get enableBackgroundService => AppConfig.enableBackgroundService;
+  static bool get enableFamilyProtection => AppConfig.enableFamilyProtection;
+  static bool get enableOfflineVault => AppConfig.enableOfflineVault;
+  static bool get enableAiCopilot => AppConfig.enableAiCopilot;
+  static bool get enableLiveAlerts => AppConfig.enableLiveAlerts;
+  static bool get enableRealTimeSync => AppConfig.enableRealTimeSync;
+  static bool get enableBiometricAuth => AppConfig.enableBiometricAuth;
+  static bool get enableMFA => AppConfig.enableMFA;
 
   // App configuration
-  static const String appName = 'CYBERSHIELD AI';
-  static const String appVersion = '1.0.0';
-  static const String buildNumber = '1';
+  static const String appName = 'RAKSAAR';
+  static const String appTagline = 'Cyber Safety Operating System';
+  static const String appVersion = '2.0.0';
+  static const String buildNumber = '200';
 
   // Encryption
-  static const String encryptionKey = 'cybershield_aes_256_key_v1';
+  static const String encryptionKey = 'raksaar_aes_256_key_v2';
   static const int encryptionIterations = 10000;
 
   // Cache durations

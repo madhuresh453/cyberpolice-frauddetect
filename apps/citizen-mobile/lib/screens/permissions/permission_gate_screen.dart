@@ -121,11 +121,11 @@ class _PermissionGateScreenState extends ConsumerState<PermissionGateScreen>
                   child: const Icon(Icons.shield, size: 40, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
-                Text('CyberShield AI',
+                Text('RAKSAAR',
                     style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 2),
-                Text('AI-Powered Scam Protection',
+                Text('Cyber Safety Operating System',
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 24),
@@ -188,7 +188,7 @@ class _PermissionGateScreenState extends ConsumerState<PermissionGateScreen>
                     icon: _loading
                         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                         : Icon(canProceed ? Icons.shield : Icons.verified_user),
-                    label: Text(_loading ? 'Checking…' : canProceed ? 'Start CyberShield Protection' : 'Grant Required Permissions'),
+                    label: Text(_loading ? 'Checking...' : canProceed ? 'Start RAKSAAR Protection' : 'Grant Required Permissions'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: canProceed ? Colors.green : theme.colorScheme.primary,
                       foregroundColor: Colors.white,
@@ -198,7 +198,7 @@ class _PermissionGateScreenState extends ConsumerState<PermissionGateScreen>
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text('A Government of India Initiative',
+                Text('A Government of India Initiative | DPDP 2023 Compliant',
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 16),
