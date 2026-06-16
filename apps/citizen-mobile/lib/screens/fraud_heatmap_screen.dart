@@ -21,7 +21,7 @@ class FraudHeatmapScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text('Mumbai, Delhi, Bangalore, Hyderabad', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.6))),
             ])),
-            Positioned(top: 10, left: 10, child: StatusBadge(label: 'LIVE', color: AppTheme.dangerRed)),
+            const Positioned(top: 10, left: 10, child: StatusBadge(label: 'LIVE', color: AppTheme.dangerRed)),
           ])),
         const SizedBox(height: 20),
         _hotspot('Mumbai', 1250, 'High'), _hotspot('Delhi', 980, 'High'),
@@ -39,11 +39,11 @@ class FraudHeatmapScreen extends StatelessWidget {
         Icon(Icons.location_on, color: color, size: 20), const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(city, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
-          Text('High Risk Reports', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+          const Text('High Risk Reports', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
         ])),
         Column(children: [
           Text('$count', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
-          Text('reports', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          const Text('reports', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
         ]),
       ]));
   }

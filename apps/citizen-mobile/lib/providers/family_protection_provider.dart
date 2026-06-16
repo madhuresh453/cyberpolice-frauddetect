@@ -24,7 +24,7 @@ class FamilyProtectionNotifier extends StateNotifier<FamilyProtectionState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.get(ApiEndpoints.familyProtection);
-      final d = r.data as Map<String, dynamic>;
+      final d = r.data;
       state = FamilyProtectionState(members: d['members'] as List<dynamic>? ?? [],
         seniorMode: d['senior_mode'] ?? false, childProtection: d['child_protection'] ?? false,
         alertsToday: d['alerts_today'] ?? 0);
@@ -52,7 +52,7 @@ class FamilyProtectionNotifier extends StateNotifier<FamilyProtectionState> {
   }
 
   Future<Map<String, dynamic>?> getMemberTrustScore(String phone) async {
-    try { final r = await _api.get('${ApiEndpoints.familyProtection}/trust-score/$phone'); return r.data as Map<String, dynamic>; }
+    try { final r = await _api.get('${ApiEndpoints.familyProtection}/trust-score/$phone'); return r.data; }
     catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 

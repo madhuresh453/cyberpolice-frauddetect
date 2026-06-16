@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield AI - Fraud Graph Explorer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; }
+        #app { display: flex; height: 100vh; }
+        #sidebar { width: 300px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; overflow-y: auto; }
+        #sidebar h2 { padding: 16px; font-size: 16px; color: #00aaff; border-bottom: 1px solid #333; }
+        .graph-btn { display: block; width: 100%; padding: 14px 16px; text-align: left; background: none; border: none; color: #ccc; cursor: pointer; border-bottom: 1px solid #222; font-size: 14px; transition: all 0.2s; }
+        .graph-btn:hover { background: #222; color: #fff; }
+        .graph-btn.active { background: #1a3a5c; color: #00aaff; border-left: 3px solid #00aaff; }
+        #search-container { padding: 16px; border-bottom: 1px solid #333; }
+        #search-input { width: 100%; padding: 10px; background: #1e1e1e; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
+        #search-input:focus { border-color: #00aaff; }
+        .search-result-item { padding: 8px 12px; cursor: pointer; border-radius: 4px; background: #1e1e1e; margin-top: 4px; font-size: 13px; }
+        .search-result-item:hover { background: #2a2a2a; color: #00aaff; }
+        #graph-area { flex: 1; position: relative; }
+        #graph-svg { width: 100%; height: 100%; }
+        #graph-info { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.85); padding: 16px; border-radius: 8px; border: 1px solid #333; min-width: 220px; display: none; }
+        #graph-info h3 { color: #00aaff; font-size: 14px; margin-bottom: 8px; }
+        #graph-info p { font-size: 13px; line-height: 1.6; color: #bbb; }
+        .stat-value { color: #00ff88; font-weight: bold; }
+        #node-detail { position: absolute; bottom: 16px; left: 16px; right: 16px; background: rgba(0,0,0,0.9); padding: 16px; border-radius: 8px; border: 1px solid #444; display: none; max-height: 200px; overflow-y: auto; }
+        #node-detail h3 { color: #00aaff; font-size: 14px; margin-bottom: 8px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+        .detail-key { color: #888; } .detail-val { color: #fff; }
+        #controls { position: absolute; top: 16px; left: 16px; display: flex; gap: 8px; z-index: 10; }
+        .ctrl-btn { padding: 8px 14px; background: #222; color: #aaa; border: 1px solid #444; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .ctrl-btn:hover { background: #333; color: #fff; }
+        #legend { position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.85); padding: 12px; border-radius: 8px; border: 1px solid #333; font-size: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 50%; }
+        #export-bar { padding: 12px 16px; border-top: 1px solid #333; margin-top: auto; }
+        .export-btn { display: inline-block; padding: 8px 14px; background: #1a3a5c; color: #00aaff; border: 1px solid #00aaff; border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 8px; transition: all 0.2s; }
+        .export-btn:hover { background: #00aaff; color: #000; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="sidebar">
+        <h2>&#128269; Fraud Graph Explorer</h2>
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Search phone, UPI, case...">
+            <div id="search-results"></div>
+        </div>
+        <button class="graph-btn active" data-graph="fraud" onclick="switchGraph('fraud')">&#128680; Fraud Network</button>
+        <button class="graph-btn" data-graph="victim" onclick="switchGraph('victim')">&#128100; Victim Graph</button>
+        <button class="graph-btn" data-graph="upi" onclick="switchGraph('upi')">&#128176; UPI Fraud Graph</button>
+        <button class="graph-btn" data-graph="phone" onclick="switchGraph('phone')">&#128222; Phone Graph</button>
+        <button class="graph-btn" data-graph="case" onclick="switchGraph('case')">&#128193; Case Graph</button>
+        <div id="export-bar">
+            <button class="export-btn" onclick="exportGraph()">&#128229; Export JSON</button>
+            <button class="export-btn" onclick="exportCSV()">&#128202; Export CSV</button>
+        </div>
+    </div>
+    <div id="graph-area">
+        <div id="controls">
+            <button class="ctrl-btn" onclick="resetZoom()">Reset</button>
+            <button class="ctrl-btn" id="lblBtn" onclick="toggleLabels()">Labels</button>
+            <button class="ctrl-btn" id="physBtn" onclick="togglePhysics()">Physics</button>
+            <button class="ctrl-btn" onclick="expandSelected()">Expand</button>
+        </div>
+        <svg id="graph-svg"></svg>
+        <div id="graph-info"><h3>Graph Statistics</h3><p>Nodes: <span class="stat-value" id="stat-nodes">0</span></p><p>Edges: <span class="stat-value" id="stat-edges">0</span></p><p>Clusters: <span class="stat-value" id="stat-clusters">0</span></p></div>
+        <div id="node-detail"><h3 id="detail-title">Node Details</h3><div id="detail-content"></div></div>
+        <div id="legend">
+            <div class="legend-item"><div class="legend-color" style="background:#ff4444"></div>High Risk</div>
+            <div class="legend-item"><div class="legend-color" style="background:#ffaa00"></div>Suspicious</div>
+            <div class="legend-item"><div class="legend-color" style="background:#00cc00"></div>Safe</div>
+            <div class="legend-item"><div class="legend-color" style="background:#4488ff"></div>Victim</div>
+            <div class="legend-item"><div class="legend-color" style="background:#aa44ff"></div>Account</div>
+        </div>
+    </div>
+</div>
+<script>
+let API_BASE = '/api/graph';
+let currentGraph = 'fraud', simulation, svgSel, g, linkSel, nodeSel, labelSel;
+let graphData = { nodes: [], links: [] }, selectedNode = null, showLabels = true, physicsOn = true;
+const nodeColors = { Phone:'#ff4444', Account:'#aa44ff', UpiId:'#ffaa00', Victim:'#4488ff', Fraudster:'#ff0000', Case:'#00aaff', Officer:'#00cc00', Evidence:'#ff8800', Sms:'#88ff88', Number:'#ff6666', Unknown:'#888888' };
+const svgEl = document.getElementById('graph-svg');
+const W = svgEl.clientWidth || 900, H = svgEl.clientHeight || 600;
+svgSel = d3.select('#graph-svg');
+g = svgSel.append('g');
+const zoomBehavior = d3.zoom().scaleExtent([0.1,8]).on('zoom', e => g.attr('transform', e.transform));
+svgSel.call(zoomBehavior);
+
+function renderGraph(data) {
+    graphData = data; g.selectAll('*').remove();
+    linkSel = g.append('g').selectAll('line').data(data.links).join('line')
+        .attr('stroke','#555').attr('stroke-width',1.5).attr('stroke-opacity',0.6)
+        .attr('marker-end','url(#arrow)');
+    g.append('defs').append('marker').attr('id','arrow').attr('viewBox','0 -5 10 10').attr('refX',20).attr('refY',0)
+        .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+        .append('path').attr('d','M0,-5L10,0L0,5').attr('fill','#555');
+    nodeSel = g.append('g').selectAll('circle').data(data.nodes).join('circle')
+        .attr('r', d => Math.max(8, (d.properties?.riskScore||10)/6))
+        .attr('fill', d => nodeColors[d.labels?.[0]]||'#888').attr('stroke','#fff').attr('stroke-width',1.5).attr('cursor','pointer')
+        .on('click',(e,d)=>selectNode(d))
+        .call(d3.drag().on('start',dragStart).on('drag',dragging).on('end',dragEnd));
+    labelSel = g.append('g').selectAll('text').data(data.nodes).join('text')
+        .text(d=>d.properties?.name||d.properties?.number||d.properties?.upiId||d.id||'')
+        .attr('font-size',10).attr('fill','#aaa').attr('dx',12).attr('dy',4).style('pointer-events','none').style('opacity',showLabels?1:0);
+    document.getElementById('stat-nodes').textContent = data.nodes.length;
+    document.getElementById('stat-edges').textContent = data.links.length;
+    document.getElementById('stat-clusters').textContent = Math.ceil(data.nodes.length/5);
+    document.getElementById('graph-info').style.display = 'block';
+    if(simulation) simulation.stop();
+    simulation = d3.forceSimulation(data.nodes)
+        .force('link',d3.forceLink(data.links).id(d=>d.id).distance(120))
+        .force('charge',d3.forceManyBody().strength(-300))
+        .force('center',d3.forceCenter(W/2,H/2))
+        .force('collision',d3.forceCollide().radius(20))
+        .on('tick',ticked);
+    if(!physicsOn) simulation.alpha(0).stop();
+}
+function ticked(){
+    linkSel.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    nodeSel.attr('cx',d=>d.x).attr('cy',d=>d.y);
+    labelSel.attr('x',d=>d.x).attr('y',d=>d.y);
+}
+function dragStart(e,d){if(!e.active&&physicsOn)simulation.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;}
+function dragging(e,d){d.fx=e.x;d.fy=e.y;}
+function dragEnd(e,d){if(!e.active&&physicsOn)simulation.alphaTarget(0);d.fx=null;d.fy=null;}
+function selectNode(d){
+    selectedNode=d;
+    const det=document.getElementById('node-detail'); det.style.display='block';
+    document.getElementById('detail-title').textContent=`${d.labels?.[0]||'Node'}: ${d.id}`;
+    let html=''; if(d.properties) Object.keys(d.properties).forEach(k=>{html+=`<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val">${d.properties[k]}</span></div>`;});
+    document.getElementById('detail-content').innerHTML=html;
+}
+function resetZoom(){svgSel.transition().duration(500).call(zoomBehavior.transform,d3.zoomIdentity);}
+function toggleLabels(){showLabels=!showLabels; labelSel.style('opacity',showLabels?1:0); document.getElementById('lblBtn').classList.toggle('active');}
+function togglePhysics(){physicsOn=!physicsOn; if(physicsOn){simulation.alpha(0.5).restart();}else{simulation.stop();} document.getElementById('physBtn').classList.toggle('active');}
+function expandSelected(){
+    if(!selectedNode){alert('Select a node first');return;}
+    fetch(`${API_BASE}/expand/${selectedNode.id}`).then(r=>r.json()).then(data=>{
+        data.nodes.forEach(n=>{if(!graphData.nodes.find(x=>x.id===n.id))graphData.nodes.push(n);});
+        data.relationships.forEach(r=>{
+            if(!graphData.links.find(l=>(l.source===r.from&&l.target===r.to)))graphData.links.push({source:r.from,target:r.to,type:r.type});
+        });
+        renderGraph(graphData);
+    }).catch(()=>alert('Expand failed - backend not reachable'));
+}
+function switchGraph(type){
+    currentGraph=type;
+    document.querySelectorAll('.graph-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector(`[data-graph="${type}"]`).classList.add('active');
+    const endpoints={fraud:'/fraud/test',victim:'/victim/test-case',upi:'/upi/test@upi',phone:'/phone/9999999999',case:'/case/test-case'};
+    fetch(`${API_BASE}${endpoints[type]}`).then(r=>r.json()).then(d=>renderGraph({nodes:d.nodes||[],links:d.relationships||[]})).catch(()=>{
+        renderGraph({nodes:[
+            {id:'+91-9876543210',labels:['Phone'],properties:{riskScore:85,name:'Fraud Suspect'}},
+            {id:'user@paytm',labels:['UpiId'],properties:{riskScore:70}},
+            {id:'ACC-9876',labels:['Account'],properties:{bank:'SBI',riskScore:90}},
+            {id:'victim-001',labels:['Victim'],properties:{name:'Citizen A'}},
+            {id:'victim-002',labels:['Victim'],properties:{name:'Citizen B'}},
+            {id:'CASE-001',labels:['Case'],properties:{type:'OTP Scam'}}
+        ],links:[
+            {source:'+91-9876543210',target:'user@paytm',type:'USES_UPI'},
+            {source:'+91-9876543210',target:'ACC-9876',type:'LINKED_ACCOUNT'},
+            {source:'+91-9876543210',target:'victim-001',type:'CALLED'},
+            {source:'+91-9876543210',target:'victim-002',type:'CALLED'},
+            {source:'victim-001',target:'CASE-001',type:'REPORTED'},
+            {source:'victim-002',target:'CASE-001',type:'REPORTED'}
+        ]});
+    });
+}
+document.getElementById('search-input').addEventListener('input',e=>{
+    const q=e.target.value.trim(); if(q.length<2)return;
+    fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(results=>{
+        const container=document.getElementById('search-results'); container.innerHTML='';
+        (results.nodes||results||[]).slice(0,10).forEach(n=>{
+            const div=document.createElement('div'); div.className='search-result-item';
+            div.textContent=`${n.labels?.[0]||'Node'}: ${n.id||n.properties?.name}`;
+            div.onclick=()=>selectNode(n); container.appendChild(div);
+        });
+    }).catch(()=>{});
+});
+function exportGraph(){const blob=new Blob([JSON.stringify(graphData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fraud-graph-export.json';a.click();}
+function exportCSV(){
+    let csv='Source,Target,Type\n'; graphData.links.forEach(l=>{csv+=`${l.source.id||l.source},${l.target.id||l.target},${l.type||''}\n`;});
+    const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fraud-graph-export.csv';a.click();
+}
+switchGraph('fraud');
+</script>
+</body>
+</html>

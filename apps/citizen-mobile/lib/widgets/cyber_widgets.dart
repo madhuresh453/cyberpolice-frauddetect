@@ -456,11 +456,11 @@ class _AiAnalysisIndicatorState extends State<AiAnalysisIndicator>
           ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
+        const SizedBox(
           width: 120,
           child: LinearProgressIndicator(
             backgroundColor: AppTheme.borderColor,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
           ),
         ),
       ],
@@ -995,7 +995,7 @@ class ThreatLevelBar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Safe', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
@@ -1202,7 +1202,7 @@ class CyberSwitch extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primaryBlue,
+            activeThumbColor: AppTheme.primaryBlue,
             activeTrackColor: AppTheme.primaryBlue.withValues(alpha: 0.3),
           ),
         ],

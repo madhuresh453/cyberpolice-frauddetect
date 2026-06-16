@@ -56,79 +56,68 @@
             </intent-filter>
         </activity>
 
-        <!-- Call Protection Foreground Service -->
+        <!-- FIX 1: CallProtectionService (Kotlin) -->
         <service
             android:name=".services.CallProtectionService"
             android:exported="false"
             android:foregroundServiceType="phoneCall|dataSync" />
 
-        <!-- SMS Protection Service -->
+        <!-- FIX 2: SMS Protection Service -->
         <service
             android:name=".services.SmsProtectionService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
-        <!-- WhatsApp Monitoring Service -->
-        <!-- <service
-            android:name=".services.WhatsappMonitorService"
+        <!-- FIX 3: Legacy Call Detection Service (Java) -->
+        <service
+            android:name=".call.CallDetectionService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" /> -->
+            android:foregroundServiceType="phoneCall" />
 
-        <!-- WhatsApp Accessibility Service -->
-        <!-- <service
-            android:name=".services.WhatsappAccessibilityService"
-            android:exported="true"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-        </service> -->
-
-        <!-- Notification Listener Service -->
-        <!-- <service
-            android:name=".services.NotificationListenerServiceImpl"
-            android:exported="true"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service> -->
-
-        <!-- Floating Warning Overlay Service -->
-        <!-- <service
-            android:name=".services.FloatingWarningService"
+        <!-- FIX 4: Foreground Service -->
+        <service
+            android:name=".call.ForegroundService"
             android:exported="false"
-            android:foregroundServiceType="systemExempted" /> -->
+            android:foregroundServiceType="phoneCall" />
 
-        <!-- Boot Receiver -->
-        <!-- <receiver
-            android:name=".receivers.BootReceiver"
+        <!-- FIX 5: Overlay Warning Service -->
+        <service
+            android:name=".overlay.CallOverlayService"
+            android:exported="false" />
+
+        <!-- FIX 6: Boot Receiver -->
+        <receiver
+            android:name=".call.BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
-        </receiver> -->
+        </receiver>
 
-        <!-- SMS Broadcast Receiver -->
+        <!-- FIX 7: SMS Broadcast Receiver (CORRECTED PATH) -->
         <receiver
-            android:name=".receivers.SmsReceiver"
+            android:name=".sms.SmsReceiver"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
-
-        <!-- Phone State Receiver -->
+        <!-- FIX 8: Call State Receiver -->
         <!-- <receiver
-            android:name=".receivers.PhoneStateReceiver"
+            android:name=".call.BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver> -->
+
+        <!-- FraudReportService (Kotlin) -->
+        <service
+            android:name=".services.FraudReportService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <meta-data
             android:name="flutterEmbedding"

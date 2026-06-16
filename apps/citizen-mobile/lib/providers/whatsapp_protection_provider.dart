@@ -26,7 +26,7 @@ class WhatsappProtectionNotifier extends StateNotifier<WhatsappProtectionState> 
     state = state.copyWith(loading: true);
     try {
       final response = await _api.get(ApiEndpoints.whatsappProtection);
-      final d = response.data as Map<String, dynamic>;
+      final d = response.data;
       state = WhatsappProtectionState(protectionActive: d['protection_active'] ?? true,
         totalMessages: d['total_messages'] ?? 0, fraudDetected: d['fraud_detected'] ?? 0,
         safeMessages: d['safe_messages'] ?? 0, recentMessages: d['recent_messages'] as List<dynamic>? ?? []);
@@ -44,7 +44,7 @@ class WhatsappProtectionNotifier extends StateNotifier<WhatsappProtectionState> 
   }
 
   Future<Map<String, dynamic>?> analyzeMessage(String text) async {
-    try { final r = await _api.post('${ApiEndpoints.whatsappProtection}/analyze', data: {'text': text}); return r.data as Map<String, dynamic>; }
+    try { final r = await _api.post('${ApiEndpoints.whatsappProtection}/analyze', data: {'text': text}); return r.data; }
     catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 }

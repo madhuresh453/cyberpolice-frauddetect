@@ -37,7 +37,7 @@ class HomeDashboard extends StatelessWidget {
                   const Text('You are Protected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.safeGreen)),
                   Text('All protection modules active', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.8))),
                 ])),
-                StatusBadge(label: 'LIVE', color: AppTheme.safeGreen),
+                const StatusBadge(label: 'LIVE', color: AppTheme.safeGreen),
               ]),
               const Divider(color: AppTheme.borderColor, height: 24),
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [

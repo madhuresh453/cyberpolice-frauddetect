@@ -26,7 +26,7 @@ class CallProtectionService : Service() {
         private const val TAG = "CallProtection"
         private const val CHANNEL_ID = "cybershield_call_protection"
         private const val NOTIFICATION_ID = 1001
-        private const val API_BASE = "http://10.0.2.2:5000/api"
+        private const val API_BASE = "https://api.uni6ctf.online/api"
         var isRunning = false
             private set
     }

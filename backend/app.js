@@ -5,11 +5,26 @@ import bcrypt from "bcryptjs";
 import { databaseHealthMiddleware } from "./shared/middlewares/databaseHealth.middleware.js";
 import { errorHandler } from "./shared/middlewares/errorHandler.middleware.js";
 import { requestLogger } from "./shared/middlewares/requestLogger.middleware.js";
+import {
+  securityHeaders,
+  corsMiddleware,
+  globalRateLimit,
+  authRateLimit,
+  sanitizeInput,
+  checkSessionTimeout,
+  preventNoSQLInjection,
+  preventAIPromptInjection,
+} from "./shared/middlewares/security.middleware.js";
 import healthRoutes from "./shared/routes/health.routes.js";
 import citizenRoutes from "./shared/routes/citizen.routes.js";
 import policeRoutes from "./shared/routes/police.routes.js";
 import ispRoutes from "./shared/routes/isp.routes.js";
 import governmentRoutes from "./shared/routes/government.routes.js";
+import aiRoutes from "./shared/routes/ai.routes.js";
+import osintRoutes from "./shared/routes/osint.routes.js";
+import nationalIntelligenceRoutes from "./shared/routes/national-intelligence.routes.js";
+import evidenceRoutes from "./routes/evidence.routes.js";
+import graphRoutes from "./routes/graph.routes.js";
 import { getDatabaseHealth } from "./shared/database/healthcheck.js";
 import { connectRedis } from "./shared/database/redis.js";
 import { connectNeo4j } from "./shared/services/neo4j.service.js";
@@ -37,15 +52,13 @@ export function createApp() {
 
   app.disable("x-powered-by");
 
-  // ===== CORS (MUST be before any routes) =====
-  app.use(
-    cors({
-      origin: true,
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"],
-    })
-  );
+  // ===== SECURITY MIDDLEWARE (V-01 through V-16 fixes) =====
+  app.use(securityHeaders);           // V-02: Helmet headers (12 headers)
+  app.use(corsMiddleware);            // V-03: Restricted CORS
+  app.use(globalRateLimit);           // V-01: Global rate limiting
+  app.use(sanitizeInput);             // V-04: NoSQL injection prevention
+  app.use(preventNoSQLInjection);     // V-16: $ operator blocking
+  app.use(preventAIPromptInjection);  // AI prompt injection prevention
 
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -234,6 +247,13 @@ export function createApp() {
         });
       }
 
+      if (!user.passwordHash) {
+        return res.status(401).json({
+          success: false,
+          error: "AUTH_FAILED",
+          message: "No password set for this account. Use OTP login.",
+        });
+      }
       const valid = bcrypt.compareSync(password, user.passwordHash);
       if (!valid) {
         return res.status(401).json({
@@ -707,6 +727,45 @@ export function createApp() {
   app.use("/api/v1/police", policeRoutes);
   app.use("/api/v1/isp", ispRoutes);
   app.use("/api/v1/government", governmentRoutes);
+
+  // ===== EVIDENCE & CHAIN OF CUSTODY ROUTES =====
+  app.use("/api/evidence", evidenceRoutes);
+  ROUTE_REGISTRY.push({ method: "ALL", path: "/api/evidence/*", description: "Evidence chain of custody routes" });
+
+  // ===== GRAPH INTELLIGENCE ROUTES =====
+  app.use("/api/graph", graphRoutes);
+  ROUTE_REGISTRY.push({ method: "ALL", path: "/api/graph/*", description: "Neo4j fraud graph visualization routes" });
+
+  // ===== OSINT ENGINE ROUTES (phone, email, domain, UPI investigation) =====
+  app.use("/api/v1/osint", osintRoutes);
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/osint/phone", description: "Phone number intelligence investigation" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/osint/email", description: "Email intelligence investigation" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/osint/domain", description: "Domain intelligence investigation" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/osint/upi", description: "UPI ID intelligence investigation" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/osint/full", description: "Full multi-factor OSINT investigation" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/osint/report-fraud", description: "Report fraudulent entity to database" });
+
+  // ===== AI INTEGRATION ROUTES (connects to Python AI Gateway) =====
+  app.use("/api/v1/ai", aiRoutes);
+  ROUTE_REGISTRY.push({ method: "ALL", path: "/api/v1/ai/*", description: "AI analysis routes (call, text, SMS, WhatsApp, threat intel)" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/ai/health", description: "AI Gateway health check" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/ai/analyze/call", description: "Complete call analysis (STT + classification + deepfake + risk)" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/ai/analyze/text", description: "Analyze text for scam indicators" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/ai/analyze/sms", description: "Analyze SMS for scams" });
+  ROUTE_REGISTRY.push({ method: "POST", path: "/api/v1/ai/analyze/whatsapp", description: "Analyze WhatsApp message" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/ai/threat-intel/phone/:number", description: "Phone threat intelligence" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/ai/threat-intel/stats", description: "Threat intel statistics" });
+
+  // ===== NATIONAL FRAUD INTELLIGENCE ROUTES (Phase 15) =====
+  app.use("/api/v1/intelligence", nationalIntelligenceRoutes);
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/fraud-numbers", description: "Search fraud number database" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/fraud-upis", description: "Search fraud UPI database" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/fraud-domains", description: "Search fraud domain database" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/heatmap", description: "National fraud heatmap" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/trending", description: "Trending scams and repeat offenders" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/network/:phoneNumber", description: "Fraud network graph from Neo4j" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/clusters", description: "Fraud clusters from Neo4j" });
+  ROUTE_REGISTRY.push({ method: "GET", path: "/api/v1/intelligence/offenders", description: "Repeat fraud offenders from Neo4j" });
 
   // ===== ENHANCED CITIZEN API ENDPOINTS (new service-based routes) =====
   // Import and mount the enhanced citizen routes

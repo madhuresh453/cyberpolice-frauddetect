@@ -45,7 +45,7 @@ class SmsProtectionNotifier extends StateNotifier<SmsProtectionState> {
     state = state.copyWith(loading: true);
     try {
       final response = await _api.get(ApiEndpoints.smsProtection);
-      final data = response.data as Map<String, dynamic>;
+      final data = response.data;
       state = SmsProtectionState(
         protectionActive: data['protection_active'] ?? true,
         totalSms: data['total_sms'] ?? 0, fraudDetected: data['fraud_detected'] ?? 0,
@@ -73,7 +73,7 @@ class SmsProtectionNotifier extends StateNotifier<SmsProtectionState> {
   Future<Map<String, dynamic>?> analyzeSms(String text) async {
     try {
       final response = await _api.post('${ApiEndpoints.smsProtection}/analyze', data: {'text': text});
-      return response.data as Map<String, dynamic>;
+      return response.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 }

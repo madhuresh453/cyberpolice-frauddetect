@@ -9,7 +9,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnim;
   late Animation<double> _scaleAnim;
@@ -18,14 +19,34 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2500));
-    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-    _scaleAnim = Tween<double>(begin: 0.3, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
-    _glowAnim = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
+
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2500));
+    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _scaleAnim = Tween<double>(begin: 0.3, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    _glowAnim = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOut)));
     _controller.forward();
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) context.go('/onboarding/1');
-    });
+
+    // SAFETY: Navigate after animation completes OR timeout (3.5s max)
+    Future.delayed(const Duration(milliseconds: 3500), _navigateToNext);
+  }
+
+  void _navigateToNext() {
+    if (!mounted) return;
+    try {
+      context.go('/onboarding/1');
+    } catch (e) {
+      debugPrint('[Splash] Navigation error: $e — fallback to home');
+      try {
+        context.go('/home');
+      } catch (_) {
+        debugPrint('[Splash] All navigation failed — staying on splash');
+      }
+    }
   }
 
   @override
@@ -43,24 +64,33 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         builder: (context, child) => Container(
           decoration: BoxDecoration(
             gradient: RadialGradient(
-              colors: [AppTheme.cyberBlue.withValues(alpha: 0.12 * _glowAnim.value), AppTheme.cyberBlack],
+              colors: [
+                AppTheme.cyberBlue.withValues(
+                    alpha: 0.12 * _glowAnim.value),
+                AppTheme.cyberBlack
+              ],
               radius: 1.5,
             ),
           ),
           child: Stack(
             children: [
-              // Animated particles simulation
-              ...List.generate(20, (i) => Positioned(
-                left: (i * 37.0) % MediaQuery.of(context).size.width,
-                top: (i * 53.0) % MediaQuery.of(context).size.height,
-                child: Opacity(
-                  opacity: 0.3 + (0.7 * ((i % 5) / 5.0)),
-                  child: Container(
-                    width: 2, height: 2,
-                    decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.cyberBlue),
+              // Animated particles
+              ...List.generate(
+                20,
+                (i) => Positioned(
+                  left: (i * 37.0) % MediaQuery.of(context).size.width,
+                  top: (i * 53.0) % MediaQuery.of(context).size.height,
+                  child: Opacity(
+                    opacity: 0.3 + (0.7 * ((i % 5) / 5.0)),
+                    child: Container(
+                      width: 2,
+                      height: 2,
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle, color: AppTheme.cyberBlue),
+                    ),
                   ),
                 ),
-              )),
+              ),
               // Center shield
               Center(
                 child: Transform.scale(
@@ -70,35 +100,63 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Shield with hexagon
                         Container(
-                          width: 120, height: 120,
+                          width: 120,
+                          height: 120,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.cyberBlue.withValues(alpha: 0.8), width: 2),
+                            border: Border.all(
+                                color: AppTheme.cyberBlue
+                                    .withValues(alpha: 0.8),
+                                width: 2),
                             boxShadow: [
-                              BoxShadow(color: AppTheme.cyberBlue.withValues(alpha: 0.3 * _glowAnim.value), blurRadius: 40, spreadRadius: 10),
+                              BoxShadow(
+                                  color: AppTheme.cyberBlue.withValues(
+                                      alpha: 0.3 * _glowAnim.value),
+                                  blurRadius: 40,
+                                  spreadRadius: 10),
                             ],
                           ),
                           child: Container(
                             margin: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppTheme.cyberBlue.withValues(alpha: 0.3), width: 1),
+                              border: Border.all(
+                                  color: AppTheme.cyberBlue
+                                      .withValues(alpha: 0.3),
+                                  width: 1),
                             ),
-                            child: const Icon(Icons.shield_outlined, size: 48, color: AppTheme.cyberBlue),
+                            child: const Icon(Icons.shield_outlined,
+                                size: 48, color: AppTheme.cyberBlue),
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // App name - gradient text
                         ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [AppTheme.cyberBlue, Color(0xFF0088FF)],
-                          ).createShader(bounds),
-                          child: const Text('CyberShield AI', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2)),
+                          shaderCallback: (bounds) =>
+                              const LinearGradient(
+                                colors: [
+                                  AppTheme.cyberBlue,
+                                  Color(0xFF0088FF)
+                                ],
+                              ).createShader(bounds),
+                          child: const Text(
+                            'CyberShield AI',
+                            style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 2),
+                          ),
                         ),
                         const SizedBox(height: 8),
-                        Text('AI Powered Scam Protection', style: TextStyle(fontSize: 14, color: AppTheme.cyberBlue.withValues(alpha: 0.8), letterSpacing: 1)),
+                        Text(
+                          'AI Powered Scam Protection',
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.cyberBlue
+                                  .withValues(alpha: 0.8),
+                              letterSpacing: 1),
+                        ),
                       ],
                     ),
                   ),
@@ -106,18 +164,28 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
               // Footer
               Positioned(
-                bottom: 60, left: 0, right: 0,
+                bottom: 60,
+                left: 0,
+                right: 0,
                 child: Opacity(
                   opacity: _fadeAnim.value,
                   child: Column(
                     children: [
-                      const SizedBox(height: 8),
-                      Text('Building a Safer India Together', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.7))),
+                      Text('Building a Safer India Together',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary
+                                  .withValues(alpha: 0.7))),
                       const SizedBox(height: 20),
-                      SizedBox(width: 24, height: 24, child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.cyberBlue.withValues(alpha: 0.6)),
-                      )),
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppTheme.cyberBlue.withValues(alpha: 0.6)),
+                        ),
+                      ),
                     ],
                   ),
                 ),

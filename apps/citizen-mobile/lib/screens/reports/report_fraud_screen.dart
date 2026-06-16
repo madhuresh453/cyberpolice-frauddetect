@@ -60,7 +60,7 @@ class _ReportFraudScreenState extends State<ReportFraudScreen> {
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: '+91 XXXXX XXXXX',
-            hintStyle: TextStyle(color: AppTheme.textDim),
+            hintStyle: const TextStyle(color: AppTheme.textDim),
             filled: true,
             fillColor: AppTheme.cardBg,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -75,7 +75,7 @@ class _ReportFraudScreenState extends State<ReportFraudScreen> {
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: 'What happened? What did they say?',
-            hintStyle: TextStyle(color: AppTheme.textDim),
+            hintStyle: const TextStyle(color: AppTheme.textDim),
             filled: true,
             fillColor: AppTheme.cardBg,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

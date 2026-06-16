@@ -20,7 +20,7 @@ class AiCopilotNotifier extends StateNotifier<AiCopilotState> {
     state = state.copyWith(loading: true);
     try {
       final response = await _api.post('/ai-copilot/chat', data: {'message': message});
-      final data = response.data as Map<String, dynamic>;
+      final data = response.data;
       final reply = data['reply'] as String? ?? '';
       final updated = List<Map<String, dynamic>>.from(state.messages)
         ..add({'from': 'user', 'text': message, 'time': DateTime.now().toIso8601String()})
@@ -35,7 +35,7 @@ class AiCopilotNotifier extends StateNotifier<AiCopilotState> {
     state = state.copyWith(loading: true);
     try {
       final response = await _api.get('/ai-copilot/analysis');
-      final data = response.data as Map<String, dynamic>;
+      final data = response.data;
       state = state.copyWith(loading: false, messages: [...state.messages, {'from': 'ai', 'text': data['analysis'] ?? 'No analysis available', 'time': DateTime.now().toIso8601String()}]);
     } catch (e) {
       state = state.copyWith(error: e.toString(), loading: false);

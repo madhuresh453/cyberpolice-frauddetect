@@ -1,9 +1,11 @@
+import 'config/app_config.dart';
+
 class AppConstants {
   static const String appName = 'CyberShield AI';
   static const String appTagline = 'AI Powered Scam Protection';
   static const String appFooter = 'Building a Safer India Together';
-  static const String apiBaseUrl = 'http://localhost:3000/api/v2';
-  static const String apiV1BaseUrl = 'http://localhost:3000/api/v1';
+  static String get apiBaseUrl => AppConfig.apiV2;
+  static String get apiV1BaseUrl => AppConfig.apiV1;
 }
 
 class StorageKeys {

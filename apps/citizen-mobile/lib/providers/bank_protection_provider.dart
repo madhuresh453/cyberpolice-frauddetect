@@ -28,7 +28,7 @@ class BankProtectionNotifier extends StateNotifier<BankProtectionState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.get(ApiEndpoints.bankProtection);
-      final d = r.data as Map<String, dynamic>;
+      final d = r.data;
       state = BankProtectionState(protectionActive: d['protection_active'] ?? true,
         accountsLinked: d['accounts_linked'] ?? 0, fraudDetected: d['fraud_detected'] ?? 0,
         freezeRequests: d['freeze_requests'] ?? 0, amountSaved: (d['amount_saved'] ?? 0).toDouble(),
@@ -39,7 +39,7 @@ class BankProtectionNotifier extends StateNotifier<BankProtectionState> {
   Future<Map<String, dynamic>?> verifyAccount(String accountNumber, String ifsc) async {
     try {
       final r = await _api.post(ApiEndpoints.bankVerify, data: {'account_number': accountNumber, 'ifsc': ifsc});
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 
@@ -47,21 +47,21 @@ class BankProtectionNotifier extends StateNotifier<BankProtectionState> {
     try {
       final r = await _api.post(ApiEndpoints.bankFreeze, data: {'account_number': accountNumber, 'reason': reason});
       state = state.copyWith(freezeRequests: state.freezeRequests + 1);
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 
   Future<Map<String, dynamic>?> emergencyFreeze(String accountNumber) async {
     try {
       final r = await _api.post('${ApiEndpoints.bankFreeze}/emergency', data: {'account_number': accountNumber});
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 
   Future<Map<String, dynamic>?> disputeTransaction(String transactionId, String reason) async {
     try {
       final r = await _api.post(ApiEndpoints.bankDispute, data: {'transaction_id': transactionId, 'reason': reason});
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 

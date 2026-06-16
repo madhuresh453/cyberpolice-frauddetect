@@ -22,7 +22,7 @@ class AlertNotifier extends StateNotifier<AlertState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.get(ApiEndpoints.liveAlerts);
-      final data = r.data as Map<String, dynamic>;
+      final data = r.data;
       final alerts = (data['alerts'] as List<dynamic>?)
           ?.map((e) => AlertModel.fromJson(e as Map<String, dynamic>))
           .toList() ?? [];

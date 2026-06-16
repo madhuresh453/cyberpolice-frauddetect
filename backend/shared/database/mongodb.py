@@ -21,7 +21,11 @@ async def connect_mongodb() -> AsyncIOMotorClient:
             retryWrites=True,
         )
         await _client.admin.command("ping")
-        await init_beanie(database=_client[settings.db_name], document_models=DOCUMENT_MODELS)
+        await init_beanie(
+            database=_client[settings.db_name],
+            document_models=DOCUMENT_MODELS,
+            allow_index_dropping=True,
+        )
     return _client
 
 

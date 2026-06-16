@@ -1,100 +1,111 @@
 "use client";
-
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { FileText, Search, Plus, Filter, ChevronRight, Clock, User, AlertTriangle, CheckCircle, ArrowUpDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+
+function getHeaders() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("jwt_token") : "";
+  return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+}
+
 export default function CasesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const statuses = ["all", "open", "investigating", "resolved", "closed"];
+  const [cases, setCases] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  useEffect(() => { fetchCases(); }, [page, statusFilter]);
+
+  async function fetchCases() {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: "20" });
+      if (statusFilter) params.set("status", statusFilter);
+      const res = await fetch(`${API}/police/cases?${params}`, { headers: getHeaders() });
+      const data = await res.json();
+      const caseList = data.data || data.cases || data || [];
+      setCases(Array.isArray(caseList) ? caseList : []);
+      setTotal(data.pagination?.total || caseList.length || 0);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <FileText className="h-8 w-8 text-primary" />
-            Case Management
-          </h1>
-          <p className="text-muted-foreground mt-1">Track and manage cyber fraud investigations</p>
+          <h1 className="text-2xl font-bold">Case Management</h1>
+          <p className="text-muted-foreground text-sm">{total} cases found</p>
         </div>
-        <button className="cyber-button flex items-center gap-2">
-          <Plus className="h-4 w-4" /> New Case
-        </button>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search cases by ID, citizen, or keyword..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-1 p-1 rounded-lg border border-border bg-card">
-          {statuses.map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-colors capitalize",
-                statusFilter === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        {[
-          { label: "Open Cases", value: "89", color: "blue" },
-          { label: "Investigating", value: "45", color: "amber" },
-          { label: "Resolved Today", value: "12", color: "emerald" },
-          { label: "High Priority", value: "23", color: "red" },
-        ].map((s) => (
-          <div key={s.label} className="stat-card">
-            <p className="text-sm text-muted-foreground">{s.label}</p>
-            <p className={cn("text-2xl font-bold mt-1", `text-${s.color}-500`)}>{s.value}</p>
+        <div className="flex gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input className="input-field pl-9 w-64" placeholder="Search cases..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-        ))}
+          <select className="input-field w-36" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
+            <option value="">All Status</option>
+            <option value="open">Open</option>
+            <option value="investigating">Investigating</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
       </div>
-      <div className="stat-card">
-        <div className="space-y-2">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-lg border border-border/50 bg-card/50 hover:bg-accent/30 transition-colors cursor-pointer">
-              <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center shrink-0",
-                i % 3 === 0 ? "bg-red-500/10" : i % 3 === 1 ? "bg-amber-500/10" : "bg-emerald-500/10"
-              )}>
-                <FileText className={cn("h-5 w-5",
-                  i % 3 === 0 ? "text-red-400" : i % 3 === 1 ? "text-amber-400" : "text-emerald-400"
-                )} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">CS-2024-{String(1200 + i).padStart(4, "0")}</span>
-                  <span className={cn("text-xs px-2 py-0.5 rounded-full capitalize",
-                    i % 3 === 0 ? "bg-red-500/10 text-red-400" : i % 3 === 1 ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400"
-                  )}>
-                    {["Open", "Investigating", "Resolved"][i % 3]}
-                  </span>
+
+      {loading ? (
+        <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="stat-card animate-pulse h-16" />)}</div>
+      ) : cases.length === 0 ? (
+        <div className="stat-card text-center py-16">
+          <AlertTriangle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">No cases found</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {cases.map((c: any) => (
+            <div key={c.id || c._id} className="stat-card hover:border-primary/50 cursor-pointer transition-all">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={cn("w-2 h-2 rounded-full", {
+                    "bg-yellow-400": c.status === "open",
+                    "bg-green-400": c.status === "closed" || c.status === "resolved",
+                    "bg-blue-400": c.status === "investigating",
+                  })} />
+                  <div>
+                    <span className="font-mono text-primary text-sm">{c.case_number || c.caseId}</span>
+                    <h3 className="font-medium">{c.title || c.fraudType || "Untitled Case"}</h3>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {["UPI Fraud", "Call Scam", "Bank Fraud", "Deepfake", "Phishing"][i % 5]} — {["Rajesh Kumar", "Priya Sharma", "Amit Patel", "Sunita Devi", "Vikram Singh"][i % 5]}
-                </p>
+                <div className="flex items-center gap-3">
+                  <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full", {
+                    "bg-red-100 text-red-700": c.priority === "critical",
+                    "bg-yellow-100 text-yellow-700": c.priority === "high",
+                    "bg-green-100 text-green-700": c.priority === "low" || c.priority === "medium",
+                  })}>
+                    {c.priority || "medium"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{c.risk_score || c.riskScore || 0} risk</span>
+                  <span className="text-xs text-muted-foreground">{new Date(c.created_at || c.createdAt).toLocaleDateString()}</span>
+                </div>
               </div>
-              <div className="text-right hidden sm:block">
-                <p className="text-xs text-muted-foreground">{i + 1}h ago</p>
-                <p className="text-xs font-medium mt-0.5">Risk: {60 + i * 3}/100</p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             </div>
           ))}
         </div>
-      </div>
+      )}
+
+      {total > 20 && (
+        <div className="flex items-center justify-center gap-4 mt-6">
+          <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="btn-outline disabled:opacity-30">
+            <ChevronLeft className="w-4 h-4" /> Previous
+          </button>
+          <span className="text-sm text-muted-foreground">Page {page} of {Math.ceil(total / 20)}</span>
+          <button disabled={page >= Math.ceil(total / 20)} onClick={() => setPage(p => p + 1)} className="btn-outline disabled:opacity-30">
+            Next <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

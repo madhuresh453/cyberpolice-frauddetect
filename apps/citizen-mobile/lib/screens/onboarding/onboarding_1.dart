@@ -27,7 +27,7 @@ class Onboarding1Screen extends StatelessWidget {
               Text("India's Most Advanced AI Fraud Protection",
                 style: TextStyle(fontSize: 14, color: AppTheme.textSecondary.withValues(alpha: 0.8)), textAlign: TextAlign.center),
               const SizedBox(height: 40),
-              CyberCard(
+              const CyberCard(
                 child: Column(
                   children: [
                     FeatureRow(icon: Icons.radar, text: 'Real-Time Scam Detection', color: AppTheme.cyberBlue),

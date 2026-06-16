@@ -11,12 +11,12 @@ class FakeApkScreen extends StatelessWidget {
       backgroundColor: AppTheme.cyberBlack,
       appBar: AppBar(title: const Text('Fake APK Detection')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
-        CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
-          const Icon(Icons.android, size: 48, color: AppTheme.dangerRed),
-          const SizedBox(height: 12),
-          const Text('Fake APK Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
-          const SizedBox(height: 8),
-          const Text('This app is attempting to install malware on your device', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+        const CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
+          Icon(Icons.android, size: 48, color: AppTheme.dangerRed),
+          SizedBox(height: 12),
+          Text('Fake APK Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
+          SizedBox(height: 8),
+          Text('This app is attempting to install malware on your device', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
         ])),
         const SizedBox(height: 20),
         _apk('SP61 Bank App', 'Fake banking APK', '85%', AppTheme.dangerRed),

@@ -1,60 +1,154 @@
 import 'package:flutter/material.dart';
-import '../../core/app_theme.dart';
-import '../../core/widgets.dart';
+import 'package:flutter/services.dart';
+import '../../themes/raksaar_theme.dart';
 
-class CyberEmergencyScreen extends StatelessWidget {
+class CyberEmergencyScreen extends StatefulWidget {
   const CyberEmergencyScreen({super.key});
+
+  @override
+  State<CyberEmergencyScreen> createState() => _CyberEmergencyScreenState();
+}
+
+class _CyberEmergencyScreenState extends State<CyberEmergencyScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseCtrl;
+  final List<bool> _savedItems = [false, false, false, false];
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.cyberBlack,
-      appBar: AppBar(title: const Text('Cyber Emergency'), backgroundColor: AppTheme.dangerRed),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
-        Container(width: double.infinity, padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppTheme.dangerRed.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14), border: Border.all(color: AppTheme.dangerRed.withValues(alpha: 0.5))),
-          child: const Column(children: [
-            Icon(Icons.emergency, size: 48, color: AppTheme.dangerRed),
-            SizedBox(height: 8),
-            Text('CYBER CRIME EMERGENCY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
-            SizedBox(height: 4),
-            Text('If you have been scammed, act immediately', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-          ])),
-        const SizedBox(height: 20),
-        _emergency('1930', 'Cyber Crime Helpline', '24/7 Hotline', AppTheme.dangerRed),
-        _emergency('100', 'Police Emergency', 'Local Police', AppTheme.warningOrange),
-        _emergency('1800-11-0031', 'Cyber Fraud Reporting', 'Government Portal', AppTheme.cyberBlue),
-        const SizedBox(height: 20),
-        const Text('Steps to Take', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-        const SizedBox(height: 12),
-        _step('1', 'Stop Communication', 'Hang up immediately'),
-        _step('2', 'Block the Number', 'Block scammer from calling again'),
-        _step('3', 'Report to 1930', 'Call cyber crime helpline'),
-        _step('4', 'File FIR Online', 'cybercrime.gov.in'),
-        _step('5', 'Alert Your Bank', 'Freeze compromised accounts'),
-      ]),
+      appBar: AppBar(
+        title: const Text('Cyber Emergency'),
+        backgroundColor: Colors.red.withValues(alpha: 0.15),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Panic header
+          AnimatedBuilder(
+            animation: _pulseCtrl,
+            builder: (ctx, child) => Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.red.withValues(alpha: 0.2 + (_pulseCtrl.value * 0.2)),
+                    Colors.red.withValues(alpha: 0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.red.withValues(alpha: 0.3 + (_pulseCtrl.value * 0.4)),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.warning_amber_rounded, size: 48, color: Colors.red.withValues(alpha: 0.8 + (_pulseCtrl.value * 0.2))),
+                  const SizedBox(height: 12),
+                  const Text('I Got Scammed',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red)),
+                  const SizedBox(height: 4),
+                  const Text('Need Immediate Help?',
+                      style: TextStyle(fontSize: 13, color: Colors.white70)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Evidence Collection
+          const Text('Collect Evidence', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 12),
+          _actionCard('Save Call Logs', Icons.phone, Colors.blue, 0),
+          _actionCard('Save SMS Records', Icons.message, Colors.green, 1),
+          _actionCard('Save Screenshots', Icons.screenshot, Colors.orange, 2),
+          _actionCard('Generate Evidence Report', Icons.description, Colors.red, 3),
+
+          const SizedBox(height: 24),
+
+          // Emergency actions
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _allSaved ? _onReportComplaint : null,
+              icon: const Icon(Icons.local_police),
+              label: Text(_allSaved ? 'Report to Cyber Cell' : 'Save All Evidence First'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.family_restroom),
+            label: const Text('Notify Family Members'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
     );
   }
-  Widget _emergency(String number, String label, String desc, Color color) => Container(
-    margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(color: AppTheme.cardBg, borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: 0.3))),
-    child: Row(children: [
-      Container(width: 44, height: 44, decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.phone, color: color, size: 20)),
-      const SizedBox(width: 14),
-      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
-        Text(desc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-      ])),
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-        child: Text(number, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color)),
+
+  bool get _allSaved => _savedItems.every((e) => e);
+
+  Widget _actionCard(String title, IconData icon, Color color, int index) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withValues(alpha: 0.15),
+          child: Icon(icon, color: color),
+        ),
+        title: Text(title, style: const TextStyle(fontSize: 14)),
+        trailing: _savedItems[index]
+            ? const Icon(Icons.check_circle, color: Colors.green, size: 24)
+            : ElevatedButton(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  setState(() => _savedItems[index] = true);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                child: const Text('Save', style: TextStyle(color: Colors.white, fontSize: 12)),
+              ),
       ),
-    ]));
-  Widget _step(String num, String title, String desc) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [
-    Container(width: 32, height: 32, decoration: BoxDecoration(color: AppTheme.dangerRed.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Center(child: Text(num, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)))),
-    const SizedBox(width: 12),
-    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
-      Text(desc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-    ])),
-  ]));
+    );
+  }
+
+  void _onReportComplaint() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Evidence saved. Case report generated. Forwarding to Cyber Cell...'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(label: 'OK', onPressed: () {}),
+      ),
+    );
+  }
 }

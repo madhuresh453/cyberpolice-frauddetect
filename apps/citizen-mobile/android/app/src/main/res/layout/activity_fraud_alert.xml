@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_fraud_alert_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="#FFFFFF">
+
+    <ImageView
+        android:id="@+id/risk_indicator"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_shield"
+        android:contentDescription="Risk Indicator" />
+
+    <TextView
+        android:id="@+id/risk_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="#F44336"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/risk_level"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Unknown Risk"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#666666"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/phone_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+_NUMBER"
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:layout_marginTop="12dp" />
+
+    <TextView
+        android:id="@+id/warning_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This number may be fraudulent. Please do not share any personal information."
+        android:textSize="14sp"
+        android:textColor="#999999"
+        android:textAlignment="center"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="32dp">
+
+        <Button
+            android:id="@+id/btn_block"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Block"
+            android:backgroundTint="#D32F2F"
+            android:textColor="#FFFFFF"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btn_report"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Report"
+            android:backgroundTint="#FF9800"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp" />
+
+        <Button
+            android:id="@+id/btn_dismiss"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Dismiss"
+            android:backgroundTint="#9E9E9E"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+</LinearLayout>

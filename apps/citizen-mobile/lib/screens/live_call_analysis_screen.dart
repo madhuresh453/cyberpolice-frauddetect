@@ -447,7 +447,7 @@ class _LiveCallAnalysisScreenState extends ConsumerState<LiveCallAnalysisScreen>
                           ),
                           child: Center(
                             child: Text(
-                              '${index}',
+                              '$index',
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,

@@ -68,9 +68,9 @@ class ProfileSettingsScreen extends StatelessWidget {
           _settingsItem(Icons.share, 'Share App', () {}),
         ]),
         const SizedBox(height: 30),
-        Center(child: Text('CyberShield AI v2.1.0', style: TextStyle(fontSize: 12, color: AppTheme.textDim))),
+        const Center(child: Text('CyberShield AI v2.1.0', style: TextStyle(fontSize: 12, color: AppTheme.textDim))),
         const SizedBox(height: 8),
-        Center(child: Text('Built with ❤️ for India', style: TextStyle(fontSize: 12, color: AppTheme.textDim))),
+        const Center(child: Text('Built with ❤️ for India', style: TextStyle(fontSize: 12, color: AppTheme.textDim))),
         const SizedBox(height: 20),
       ]),
     );

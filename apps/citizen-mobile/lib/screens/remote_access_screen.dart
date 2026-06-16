@@ -13,12 +13,12 @@ class RemoteAccessScreen extends StatelessWidget {
       body: ListView(padding: const EdgeInsets.all(16), children: [
         const RiskMeter(score: 90, size: 120, showLabel: true),
         const SizedBox(height: 20),
-        CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
-          const Icon(Icons.phishing, size: 48, color: AppTheme.dangerRed),
-          const SizedBox(height: 12),
-          const Text('Remote Access Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
-          const SizedBox(height: 8),
-          const Text('This is a very high risk scam pattern', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+        const CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
+          Icon(Icons.phishing, size: 48, color: AppTheme.dangerRed),
+          SizedBox(height: 12),
+          Text('Remote Access Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
+          SizedBox(height: 8),
+          Text('This is a very high risk scam pattern', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
         ])),
         const SizedBox(height: 20),
         const Text('Scam Pattern Detected', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),

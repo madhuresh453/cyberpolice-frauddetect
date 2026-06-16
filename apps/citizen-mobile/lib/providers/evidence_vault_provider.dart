@@ -27,7 +27,7 @@ class EvidenceVaultNotifier extends StateNotifier<EvidenceVaultState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.get(ApiEndpoints.evidenceUpload);
-      final d = r.data as Map<String, dynamic>;
+      final d = r.data;
       state = EvidenceVaultState(totalFiles: d['total_files'] ?? 0, usedStorage: (d['used_storage'] ?? 0).toDouble(),
         syncedFiles: d['synced_files'] ?? 0, pendingSync: d['pending_sync'] ?? 0,
         files: d['files'] as List<dynamic>? ?? []);
@@ -41,7 +41,7 @@ class EvidenceVaultNotifier extends StateNotifier<EvidenceVaultState> {
         'file_path': filePath, 'file_type': fileType, 'timestamp': DateTime.now().toIso8601String(),
       });
       await loadFiles();
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString(), loading: false); return null; }
   }
 
@@ -58,7 +58,7 @@ class EvidenceVaultNotifier extends StateNotifier<EvidenceVaultState> {
   Future<String?> getFileUrl(String fileId) async {
     try {
       final r = await _api.get('${ApiEndpoints.evidenceUpload}/$fileId/download');
-      final d = r.data as Map<String, dynamic>; return d['url'] as String?;
+      final d = r.data; return d['url'] as String?;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 }

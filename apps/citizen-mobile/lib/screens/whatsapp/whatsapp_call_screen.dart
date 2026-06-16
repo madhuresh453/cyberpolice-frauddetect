@@ -33,10 +33,10 @@ class _WhatsappCallScreenState extends State<WhatsappCallScreen> with SingleTick
           const SizedBox(height: 4),
           Text('High Risk Scammer Number', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.8))),
           const SizedBox(height: 24),
-          CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
-            const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Risk Score', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)), Text('95/100', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.dangerRed))]),
-            const SizedBox(height: 8),
-            const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Status', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)), Text('Very High Risk', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.dangerRed))]),
+          const CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Risk Score', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)), Text('95/100', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.dangerRed))]),
+            SizedBox(height: 8),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Status', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)), Text('Very High Risk', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.dangerRed))]),
           ])),
           const SizedBox(height: 16),
           const Text('Detected Keywords', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),

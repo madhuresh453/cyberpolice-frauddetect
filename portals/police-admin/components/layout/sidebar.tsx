@@ -29,7 +29,7 @@ import {
 import { useState } from "react";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: AlertTriangle, label: "Live Monitoring", href: "/live-monitoring" },
   { icon: Phone, label: "Call Analysis", href: "/call-analysis" },
   { icon: MessageSquare, label: "SMS Analysis", href: "/sms-analysis" },

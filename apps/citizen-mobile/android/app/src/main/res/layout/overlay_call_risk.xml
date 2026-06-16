@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/overlay_call_risk_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#E8F5E9">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_shield"
+            android:contentDescription="Shield" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="RAKSAAR Call Protection"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1565C0"
+            android:layout_marginStart="12dp" />
+
+        <TextView
+            android:id="@+id/risk_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safe"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="#4CAF50"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/caller_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Checking number..."
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/risk_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#999999"
+        android:layout_marginTop="4dp" />
+</LinearLayout>

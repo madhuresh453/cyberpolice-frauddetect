@@ -11,12 +11,12 @@ class ScreenSharingScreen extends StatelessWidget {
       backgroundColor: AppTheme.cyberBlack,
       appBar: AppBar(title: const Text('Screen Sharing Detection')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
-        CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
-          const Icon(Icons.screen_share, size: 48, color: AppTheme.dangerRed),
-          const SizedBox(height: 12),
-          const Text('Screen Sharing Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
-          const SizedBox(height: 8),
-          const Text('An app is attempting to capture your screen', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+        const CyberCard(borderColor: AppTheme.dangerRed, child: Column(children: [
+          Icon(Icons.screen_share, size: 48, color: AppTheme.dangerRed),
+          SizedBox(height: 12),
+          Text('Screen Sharing Detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)),
+          SizedBox(height: 8),
+          Text('An app is attempting to capture your screen', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
         ])),
         const SizedBox(height: 20),
         const Text('Active Screen Sharing Sessions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),

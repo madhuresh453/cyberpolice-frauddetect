@@ -24,10 +24,16 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="CyberShield AI Auth Service", version="3.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:55389",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
-    allow_headers=["authorization", "content-type", "x-device-id", "x-device-type", "x-request-id"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.add_middleware(SecurityHeadersMiddleware)
 app.middleware("http")(request_logger_middleware)

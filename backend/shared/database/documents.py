@@ -1,6 +1,5 @@
 from datetime import UTC, datetime
 from typing import Any
-
 from beanie import Indexed
 from pydantic import EmailStr, Field, field_validator
 from pymongo import ASCENDING, DESCENDING, IndexModel
@@ -34,7 +33,7 @@ class UserDocument(BaseDocument):
     phone_number: Indexed(str, unique=True)
     password_hash: str
     full_name: str
-    user_type: Indexed(UserRole)
+    user_type: UserRole
     roles: list[str] = Field(default_factory=list)
     permissions: list[str] = Field(default_factory=list)
     status: Indexed(str) = "active"
@@ -98,7 +97,7 @@ class CitizenDocument(BaseDocument):
     user_id: Indexed(str, unique=True)
     phone_number: Indexed(str, unique=True)
     preferred_language: str = "en"
-    state: Indexed(str | None) = None
+    state: str | None = None
     district: str | None = None
 
     class Settings:
@@ -128,10 +127,10 @@ class ISPOperatorDocument(BaseDocument):
 
 
 class FraudReportDocument(BaseDocument):
-    report_id: Indexed(str, unique=True)
+    report_id: str | None = None
     citizen_id: Indexed(str)
-    phone_number: Indexed(str | None) = None
-    upi_id: Indexed(str | None) = None
+    phone_number: str | None = None
+    upi_id: str | None = None
     status: Indexed(str) = "submitted"
     risk_score: Indexed(float) = 0
     description: str
@@ -141,10 +140,10 @@ class FraudReportDocument(BaseDocument):
 
 
 class AnalysisDocument(BaseDocument):
-    report_id: Indexed(str | None) = None
-    case_id: Indexed(str | None) = None
-    phone_number: Indexed(str | None) = None
-    upi_id: Indexed(str | None) = None
+    report_id: str | None = None
+    case_id: str | None = None
+    phone_number: str | None = None
+    upi_id: str | None = None
     risk_score: Indexed(float) = 0
     risk_level: RiskLevel = RiskLevel.SAFE
     model_version: str = "auth-phase3"
@@ -180,8 +179,8 @@ class UPIAnalysisDocument(AnalysisDocument):
 
 
 class EvidenceDocument(BaseDocument):
-    case_id: Indexed(str | None) = None
-    report_id: Indexed(str | None) = None
+    case_id: str | None = None
+    report_id: str | None = None
     evidence_type: str
     storage_uri: str
     sha256: Indexed(str, unique=True)
@@ -192,7 +191,7 @@ class EvidenceDocument(BaseDocument):
 
 class CaseDocument(BaseDocument):
     case_id: Indexed(str, unique=True)
-    report_id: Indexed(str | None) = None
+    report_id: str | None = None
     status: Indexed(str) = "new"
     risk_score: Indexed(float) = 0
     assigned_officer_id: str | None = None
@@ -247,7 +246,7 @@ class FraudCampaignDocument(BaseDocument):
 
 
 class AuditLogDocument(BaseDocument):
-    actor_user_id: Indexed(str | None) = None
+    actor_user_id: str | None = None
     actor_role: UserRole = UserRole.SYSTEM
     action: Indexed(str)
     resource: Indexed(str)

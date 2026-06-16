@@ -4,7 +4,7 @@ export default createModel(
   "RefreshToken",
   {
     userId: { type: objectId, ref: "User", required: true, index: true },
-    token: { type: String, required: true, unique: true, index: true },
+    token: { type: String, required: true },
     family: { type: String, index: true },
     ipAddress: { type: String },
     userAgent: { type: String },
@@ -17,7 +17,7 @@ export default createModel(
   {
     collection: "refresh_tokens",
     indexes: [
-      { fields: { token: 1 }, options: { unique: true } },
+      { fields: { token: 1 }, options: { unique: true, partialFilterExpression: { token: { $type: "string" } } } },
       { fields: { userId: 1, isActive: 1 } },
       { fields: { expiresAt: 1 } },
       { fields: { family: 1 } }

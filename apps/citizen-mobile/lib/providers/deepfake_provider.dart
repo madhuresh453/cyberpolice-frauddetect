@@ -30,7 +30,7 @@ class DeepfakeNotifier extends StateNotifier<DeepfakeState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.get('${ApiEndpoints.deepfakeResult}/stats');
-      final d = r.data as Map<String, dynamic>;
+      final d = r.data;
       state = DeepfakeState(detectionActive: d['detection_active'] ?? true,
         totalAnalyses: d['total_analyses'] ?? 0, fraudDetected: d['fraud_detected'] ?? 0,
         safeAnalyses: d['safe_analyses'] ?? 0, recentAnalyses: d['recent_analyses'] as List<dynamic>? ?? []);
@@ -42,8 +42,8 @@ class DeepfakeNotifier extends StateNotifier<DeepfakeState> {
     try {
       final formData = {'file_path': filePath};
       final r = await _api.post(ApiEndpoints.deepfakeVoice, data: formData);
-      state = state.copyWith(currentAnalysis: r.data as Map<String, dynamic>, loading: false);
-      return r.data as Map<String, dynamic>;
+      state = state.copyWith(currentAnalysis: r.data, loading: false);
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString(), loading: false); return null; }
   }
 
@@ -51,8 +51,8 @@ class DeepfakeNotifier extends StateNotifier<DeepfakeState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.post(ApiEndpoints.deepfakeVideo, data: {'file_path': filePath});
-      state = state.copyWith(currentAnalysis: r.data as Map<String, dynamic>, loading: false);
-      return r.data as Map<String, dynamic>;
+      state = state.copyWith(currentAnalysis: r.data, loading: false);
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString(), loading: false); return null; }
   }
 
@@ -60,15 +60,15 @@ class DeepfakeNotifier extends StateNotifier<DeepfakeState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.post(ApiEndpoints.deepfakeRealtime);
-      state = state.copyWith(currentAnalysis: r.data as Map<String, dynamic>, loading: false);
-      return r.data as Map<String, dynamic>;
+      state = state.copyWith(currentAnalysis: r.data, loading: false);
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString(), loading: false); return null; }
   }
 
   Future<Map<String, dynamic>?> getAnalysisResult(String analysisId) async {
     try {
       final r = await _api.get('${ApiEndpoints.deepfakeResult}/$analysisId');
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 }

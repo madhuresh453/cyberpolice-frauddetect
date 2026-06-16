@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../themes/app_theme.dart';
+import '../core/permission_manager.dart';
 /// Permission Center Screen - requests all required permissions
 class PermissionCenterScreen extends ConsumerStatefulWidget {
   const PermissionCenterScreen({super.key});
@@ -21,6 +22,8 @@ class _PermissionCenterScreenState extends ConsumerState<PermissionCenterScreen>
   bool _locationGranted = false;
   bool _storageGranted = false;
   bool _cameraGranted = false;
+  bool _overlayGranted = false;
+  bool _batteryGranted = false;
   bool _loading = false;
 
   @override
@@ -31,6 +34,7 @@ class _PermissionCenterScreenState extends ConsumerState<PermissionCenterScreen>
 
   Future<void> _checkPermissions() async {
     setState(() => _loading = true);
+    final permMap = await RaksaarPermissionManager.checkAllPermissions();
     final phone = await Permission.phone.status;
     final sms = await Permission.sms.status;
     final contacts = await Permission.contacts.status;
@@ -39,6 +43,8 @@ class _PermissionCenterScreenState extends ConsumerState<PermissionCenterScreen>
     final location = await Permission.location.status;
     final storage = await Permission.storage.status;
     final camera = await Permission.camera.status;
+    final overlay = await Permission.systemAlertWindow.status;
+    final battery = await Permission.ignoreBatteryOptimizations.status;
 
     setState(() {
       _phoneGranted = phone.isGranted;
@@ -49,6 +55,8 @@ class _PermissionCenterScreenState extends ConsumerState<PermissionCenterScreen>
       _locationGranted = location.isGranted;
       _storageGranted = storage.isGranted;
       _cameraGranted = camera.isGranted;
+      _overlayGranted = overlay.isGranted;
+      _batteryGranted = battery.isGranted;
       _loading = false;
     });
   }
@@ -65,6 +73,8 @@ class _PermissionCenterScreenState extends ConsumerState<PermissionCenterScreen>
         case Permission.location: _locationGranted = status.isGranted; break;
         case Permission.storage: _storageGranted = status.isGranted; break;
         case Permission.camera: _cameraGranted = status.isGranted; break;
+        case Permission.systemAlertWindow: _overlayGranted = status.isGranted; break;
+        case Permission.ignoreBatteryOptimizations: _batteryGranted = status.isGranted; break;
         default: break;
       }
     });
@@ -81,13 +91,16 @@ class _PermissionCenterScreenState extends ConsumerState<PermissionCenterScreen>
       Permission.location.request(),
       Permission.storage.request(),
       Permission.camera.request(),
+      Permission.systemAlertWindow.request(),
+      Permission.ignoreBatteryOptimizations.request(),
     ].wait;
     await _checkPermissions();
   }
 
   bool get _allGranted =>
       _phoneGranted && _smsGranted && _contactsGranted &&
-      _notificationsGranted && _microphoneGranted && _locationGranted;
+      _notificationsGranted && _microphoneGranted && _locationGranted &&
+      _storageGranted && _cameraGranted && _overlayGranted && _batteryGranted;
 
   @override
   Widget build(BuildContext context) {
@@ -223,9 +236,9 @@ class _PermissionCenterScreenState extends ConsumerState<PermissionCenterScreen>
                             width: 20, height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
-                        : Row(
+                        : const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Icon(Icons.shield, size: 20),
                               SizedBox(width: 8),
                               Text('Allow All Permissions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),

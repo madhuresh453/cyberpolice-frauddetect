@@ -63,7 +63,7 @@ class CallProtectionNotifier extends StateNotifier<CallProtectionState> {
     state = state.copyWith(loading: true);
     try {
       final response = await _api.get(ApiEndpoints.callProtection);
-      final data = response.data as Map<String, dynamic>;
+      final data = response.data;
       state = CallProtectionState(
         protectionActive: data['protection_active'] ?? true,
         callsToday: data['calls_today'] ?? 0,
@@ -111,7 +111,7 @@ class CallProtectionNotifier extends StateNotifier<CallProtectionState> {
   Future<CallLogModel?> getCallAnalysis(String callId) async {
     try {
       final response = await _api.get('${ApiEndpoints.callProtection}/$callId');
-      return CallLogModel.fromJson(response.data as Map<String, dynamic>);
+      return CallLogModel.fromJson(response.data);
     } catch (e) {
       state = state.copyWith(error: e.toString());
       return null;

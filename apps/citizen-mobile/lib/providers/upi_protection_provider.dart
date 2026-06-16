@@ -28,7 +28,7 @@ class UpiProtectionNotifier extends StateNotifier<UpiProtectionState> {
     state = state.copyWith(loading: true);
     try {
       final r = await _api.get(ApiEndpoints.upiProtection);
-      final d = r.data as Map<String, dynamic>;
+      final d = r.data;
       state = UpiProtectionState(protectionActive: d['protection_active'] ?? true,
         transactionsToday: d['transactions_today'] ?? 0, fraudDetected: d['fraud_detected'] ?? 0,
         safeTransactions: d['safe_transactions'] ?? 0, amountSaved: (d['amount_saved'] ?? 0).toDouble(),
@@ -39,14 +39,14 @@ class UpiProtectionNotifier extends StateNotifier<UpiProtectionState> {
   Future<Map<String, dynamic>?> verifyUpiId(String upiId) async {
     try {
       final r = await _api.post('${ApiEndpoints.upiProtection}/verify', data: {'upi_id': upiId});
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 
   Future<Map<String, dynamic>?> checkMerchantReputation(String upiId) async {
     try {
       final r = await _api.get('${ApiEndpoints.upiProtection}/merchant/$upiId');
-      return r.data as Map<String, dynamic>;
+      return r.data;
     } catch (e) { state = state.copyWith(error: e.toString()); return null; }
   }
 

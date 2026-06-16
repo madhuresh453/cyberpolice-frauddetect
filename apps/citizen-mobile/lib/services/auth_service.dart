@@ -13,7 +13,7 @@ class AuthService {
   Future<UserModel> getCurrentUser() async {
     try {
       final response = await _api.get(ApiEndpoints.me);
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
+      return UserModel.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

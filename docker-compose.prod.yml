@@ -1,0 +1,189 @@
+version: '3.8'
+
+services:
+  # ===== DATABASES =====
+  mongodb:
+    image: mongo:7
+    container_name: raksaar-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: cyber-police
+    networks:
+      - raksaar-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: raksaar-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - raksaar-network
+
+  neo4j:
+    image: neo4j:5
+    container_name: raksaar-neo4j
+    restart: unless-stopped
+    ports:
+      - "7687:7687"
+      - "7474:7474"
+    environment:
+      NEO4J_AUTH: neo4j/raksaar_secret_2024
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - raksaar-network
+
+  # ===== BACKEND SERVICES =====
+  express-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: raksaar-express
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+      - redis
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://mongodb:27017/cyber-police
+      DB_NAME: cyber-police
+      JWT_SECRET: raksaar_jwt_secret_production_change_me
+      REDIS_URL: redis://redis:6379
+      AI_GATEWAY_URL: http://ai-gateway:8000
+    networks:
+      - raksaar-network
+
+  # ===== AI SERVICES =====
+  ai-gateway:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile.ai
+    container_name: raksaar-ai-gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      - stt-service
+      - classifier-service
+      - deepfake-service
+    environment:
+      STT_SERVICE_URL: http://stt-service:8001
+      CLASSIFIER_SERVICE_URL: http://classifier-service:8002
+      DEEPFAKE_SERVICE_URL: http://deepfake-service:8003
+      BHASHINI_API_KEY: ""
+      BHASHINI_USER_ID: ""
+    networks:
+      - raksaar-network
+
+  stt-service:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile.stt
+    container_name: raksaar-stt
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      BHASHINI_API_KEY: ""
+      BHASHINI_API_URL: https://api.bhashini.gov.in/v1
+    networks:
+      - raksaar-network
+
+  classifier-service:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile.classifier
+    container_name: raksaar-classifier
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    networks:
+      - raksaar-network
+
+  deepfake-service:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile.deepfake
+    container_name: raksaar-deepfake
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    networks:
+      - raksaar-network
+
+  # ===== FRONTEND SERVICES =====
+  flutter-app:
+    build:
+      context: ./apps/citizen-mobile
+      dockerfile: Dockerfile
+    container_name: raksaar-flutter
+    ports:
+      - "8080:80"
+    depends_on:
+      - express-backend
+    networks:
+      - raksaar-network
+
+  police-portal:
+    build:
+      context: ./apps/police-portal
+      dockerfile: Dockerfile
+    container_name: raksaar-police-portal
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - express-backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000/api/v1
+      NODE_ENV: production
+    networks:
+      - raksaar-network
+
+  # ===== MONITORING =====
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: raksaar-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - raksaar-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: raksaar-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: raksaar_admin_2024
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - raksaar-network
+
+networks:
+  raksaar-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  neo4j_data:
+  prometheus_data:
+  grafana_data:

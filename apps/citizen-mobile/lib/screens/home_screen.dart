@@ -20,7 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _loadData() {
     final authState = ref.read(authProvider);
-    final phone = authState.user?.phoneNumber ?? '';
+    final phone = authState.phoneNumber ?? '';
     if (phone.isNotEmpty) {
       ref.read(homeProvider.notifier).loadDashboard(phone);
     }
@@ -30,7 +30,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeProvider);
     final authState = ref.watch(authProvider);
-    final user = authState.user;
+    final user = authState;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -45,9 +45,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // Header
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Welcome, ${user?.name ?? 'User'}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text('Welcome, ${user.fullName ?? 'User'}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
                         const SizedBox(height: 4),
-                        Text(user?.email ?? 'No email', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                        Text(user.email ?? 'No email', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
                       ]),
                       GestureDetector(
                         onTap: () => context.push('/profile'),

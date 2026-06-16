@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/app_theme.dart';
-import '../../core/widgets.dart';
 
 class ScamTrainingScreen extends StatelessWidget {
   const ScamTrainingScreen({super.key});

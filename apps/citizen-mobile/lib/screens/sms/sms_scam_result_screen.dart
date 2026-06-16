@@ -33,9 +33,9 @@ class SmsScamResultScreen extends StatelessWidget {
           ])),
           const SizedBox(height: 20),
           Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            Column(children: [const Text('92%', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)), const Text('AI Confidence', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary))]),
+            const Column(children: [Text('92%', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)), Text('AI Confidence', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary))]),
             Container(width: 1, height: 40, color: AppTheme.borderColor),
-            Column(children: [const Text('High', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)), const Text('Threat Level', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary))]),
+            const Column(children: [Text('High', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.dangerRed)), Text('Threat Level', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary))]),
           ]),
           const Spacer(),
           Row(children: [
@@ -49,7 +49,7 @@ class SmsScamResultScreen extends StatelessWidget {
     );
   }
   Widget _factor(String text) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
-    Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.dangerRed), const SizedBox(width: 8),
+    const Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.dangerRed), const SizedBox(width: 8),
     Expanded(child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white))),
   ]));
 }

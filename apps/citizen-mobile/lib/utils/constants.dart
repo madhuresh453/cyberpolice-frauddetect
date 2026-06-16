@@ -1,11 +1,12 @@
 import '../config/environment.dart';
+import '../core/config/app_config.dart';
 
 class AppConstants {
   static const String appName = 'CYBERSHIELD AI';
   static String get apiBaseUrl => Environment.apiBaseUrl;
   static String get wsBaseUrl => Environment.wsBaseUrl;
   static String get socketUrl => Environment.socketUrl;
-  static String get policePortalUrl => Environment.policePortalUrl;
+  static String get policePortalUrl => AppConfig.adminUrl;
   static const String mapboxToken = 'pk.mapbox_token';
   
   static const double cardRadius = 16;

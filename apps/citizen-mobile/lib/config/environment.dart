@@ -1,43 +1,10 @@
+import 'package:cybershield_citizen/core/config/app_config.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Environment {
-  static String get apiBaseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:5000/api/v1';
-    }
-    return _getMobileBaseUrl();
-  }
-
-  static String get wsBaseUrl {
-    if (kIsWeb) {
-      return 'ws://localhost:5000/ws';
-    }
-    return _getMobileWsUrl();
-  }
-
-  static String get socketUrl {
-    if (kIsWeb) {
-      return 'http://localhost:5000';
-    }
-    return _getMobileBaseUrl().replaceFirst('/api/v1', '');
-  }
-
-  static String _getMobileBaseUrl() {
-    // For Android emulator, use 10.0.2.2 to reach host localhost
-    // For physical devices, the user should set their machine IP
-    return 'http://10.0.2.2:5000/api/v1';
-  }
-
-  static String _getMobileWsUrl() {
-    return 'ws://10.0.2.2:5000/ws';
-  }
-
-  static String get policePortalUrl {
-    if (kIsWeb) {
-      return 'http://localhost:3000';
-    }
-    return 'http://10.0.2.2:3000';
-  }
+  static String get apiBaseUrl => AppConfig.apiV1;
+  static String get wsBaseUrl => AppConfig.webSocketUrl;
+  static String get socketUrl => AppConfig.apiBaseUrl;
 
   // API timeout durations
   static const Duration connectTimeout = Duration(seconds: 15);

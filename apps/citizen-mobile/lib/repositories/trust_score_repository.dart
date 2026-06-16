@@ -11,7 +11,7 @@ class TrustScoreRepository {
   Future<TrustScoreModel> getTrustScore(String phoneNumber) async {
     try {
       final response = await _api.get('${ApiEndpoints.trustScore}/$phoneNumber');
-      return TrustScoreModel.fromJson(response.data as Map<String, dynamic>);
+      return TrustScoreModel.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -30,7 +30,7 @@ class TrustScoreRepository {
   Future<Map<String, dynamic>> getFamilyProtection() async {
     try {
       final response = await _api.get(ApiEndpoints.familyProtection);
-      return response.data as Map<String, dynamic>;
+      return response.data;
     } catch (e) {
       rethrow;
     }
@@ -39,7 +39,7 @@ class TrustScoreRepository {
   Future<FraudReportModel> reportFraud(Map<String, dynamic> reportData) async {
     try {
       final response = await _api.post(ApiEndpoints.reportCall, data: reportData);
-      return FraudReportModel.fromJson(response.data as Map<String, dynamic>);
+      return FraudReportModel.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -64,7 +64,7 @@ class TrustScoreRepository {
   Future<FraudReportModel> reportCall(Map<String, dynamic> data) async {
     try {
       final response = await _api.post(ApiEndpoints.reportCall, data: data);
-      return FraudReportModel.fromJson(response.data as Map<String, dynamic>);
+      return FraudReportModel.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -73,7 +73,7 @@ class TrustScoreRepository {
   Future<FraudReportModel> reportSms(Map<String, dynamic> data) async {
     try {
       final response = await _api.post(ApiEndpoints.reportSms, data: data);
-      return FraudReportModel.fromJson(response.data as Map<String, dynamic>);
+      return FraudReportModel.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -82,7 +82,7 @@ class TrustScoreRepository {
   Future<FraudReportModel> reportWhatsapp(Map<String, dynamic> data) async {
     try {
       final response = await _api.post(ApiEndpoints.reportWhatsapp, data: data);
-      return FraudReportModel.fromJson(response.data as Map<String, dynamic>);
+      return FraudReportModel.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -91,7 +91,7 @@ class TrustScoreRepository {
   Future<Map<String, dynamic>> getDashboard(String phoneNumber) async {
     try {
       final response = await _api.get('${ApiEndpoints.dashboard}/$phoneNumber');
-      return response.data as Map<String, dynamic>;
+      return response.data;
     } catch (e) {
       rethrow;
     }
