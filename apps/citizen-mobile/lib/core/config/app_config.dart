@@ -15,7 +15,7 @@ class AppConfig {
   static const String _prodAiBaseUrl = 'https://api.uni6ctf.online';
   static const String _prodAdminUrl = 'https://police.uni6ctf.online';
   static const String _prodAppUrl = 'https://app.uni6ctf.online';
-  static const String _prodWebSocketUrl = 'wss://api.uni6ctf.online/ws';
+  static const String _prodWebSocketUrl = '';
 
   // ─── Development URLs ───
   static const String _devApiBaseUrl = 'http://10.0.2.2:5000';
@@ -81,8 +81,8 @@ class AppConfig {
   static const int maxLoginAttempts = 5;
   static const Duration lockoutDuration = Duration(minutes: 15);
   static const int sessionTimeoutMinutes = 30;
-  static const bool requireCertificatePinning = true;
-  static const String encryptionKey = 'raksaar_aes_256_key_v2';
+  static const bool requireCertificatePinning = false;
+  static const String encryptionKey = '';
   static const int encryptionIterations = 10000;
 
   // ─── Splash ───

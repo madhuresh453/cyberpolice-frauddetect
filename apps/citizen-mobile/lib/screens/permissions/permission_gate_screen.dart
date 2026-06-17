@@ -132,10 +132,10 @@ class _PermissionGateScreenState extends ConsumerState<PermissionGateScreen>
 
                 if (!_loading) ...[
                   // Mandatory section header
-                  Align(
+                  const Align(
                     alignment: Alignment.centerLeft,
                     child: Text('Mandatory Permissions',
-                        style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white70, fontSize: 13)),
+                        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white70, fontSize: 13)),
                   ),
                   const SizedBox(height: 8),
                   _permTile(Icons.phone_in_talk, 'Call Logs', _callLogsGranted, Permission.phone),
@@ -146,10 +146,10 @@ class _PermissionGateScreenState extends ConsumerState<PermissionGateScreen>
                   _permTile(Icons.notifications_active, 'Notifications', _notificationsGranted, Permission.notification),
                   const SizedBox(height: 12),
                   // Optional section header
-                  Align(
+                  const Align(
                     alignment: Alignment.centerLeft,
                     child: Text('Optional Features',
-                        style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white70, fontSize: 13)),
+                        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white70, fontSize: 13)),
                   ),
                   const SizedBox(height: 8),
                   _optionalTile(Icons.wallpaper, 'Overlay Protection', _overlayGranted, Permission.systemAlertWindow),

@@ -40,7 +40,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
     final name = widget.callerName ?? 'Unknown Number';
 
     // Risk analysis (mock)
-    final riskScore = 85;
+    const riskScore = 85;
     final isHighRisk = riskScore > 60;
 
     return Scaffold(

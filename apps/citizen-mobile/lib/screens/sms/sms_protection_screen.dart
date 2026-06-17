@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../themes/raksaar_theme.dart';
 
 class SmsProtectionScreen extends ConsumerStatefulWidget {
   const SmsProtectionScreen({super.key});

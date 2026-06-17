@@ -345,7 +345,7 @@ class _AiInvestigatorTabScreenState extends State<AiInvestigatorTabScreen> {
                     color: riskColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text('${riskLevel}'.toUpperCase(),
+                  child: Text('$riskLevel'.toUpperCase(),
                       style: TextStyle(color: riskColor, fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               ],

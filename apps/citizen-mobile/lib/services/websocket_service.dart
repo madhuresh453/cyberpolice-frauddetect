@@ -22,45 +22,54 @@ class RaksaarWebSocketService {
   Stream<Map<String, dynamic>>? get events => _eventController?.stream;
   bool get isConnected => _isConnected;
 
-  /// Connect to WebSocket server
-  Future<void> connect({required String userId, String serverUrl = ''}) async {
-    final url = serverUrl.isNotEmpty ? serverUrl : AppConfig.webSocketUrl;
-    _userId = userId;
-    _eventController = StreamController<Map<String, dynamic>>.broadcast();
+/// Connect to WebSocket server
+Future<void> connect({
+  required String userId,
+  String serverUrl = '',
+}) async {
 
-    try {
-      _channel = WebSocketChannel.connect(Uri.parse(serverUrl));
-      _isConnected = true;
-      _reconnectAttempts = 0;
-
-      // Join citizen room
-      _channel!.sink.add(jsonEncode({
-        'event': 'join:citizen',
-        'data': userId,
-      }));
-
-      // Listen for messages
-      _channel!.stream.listen(
-        (message) {
-          _handleMessage(message);
-        },
-        onError: (error) {
-          debugPrint('[WS] Error: $error');
-          _handleDisconnect();
-        },
-        onDone: () {
-          debugPrint('[WS] Connection closed');
-          _handleDisconnect();
-        },
-      );
-
-      debugPrint('[WS] Connected to $serverUrl as citizen $userId');
-    } catch (e) {
-      debugPrint('[WS] Connection failed: $e');
-      _handleDisconnect();
-    }
+  if (AppConfig.webSocketUrl.isEmpty) {
+    debugPrint('[WS] Disabled - No backend websocket configured');
+    return;
   }
 
+  final url =
+      serverUrl.isNotEmpty ? serverUrl : AppConfig.webSocketUrl;
+
+  _userId = userId;
+  _eventController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
+  try {
+    _channel = WebSocketChannel.connect(Uri.parse(url));
+    _isConnected = true;
+    _reconnectAttempts = 0;
+
+    _channel!.sink.add(jsonEncode({
+      'event': 'join:citizen',
+      'data': userId,
+    }));
+
+    _channel!.stream.listen(
+      (message) {
+        _handleMessage(message);
+      },
+      onError: (error) {
+        debugPrint('[WS] Error: $error');
+        _handleDisconnect();
+      },
+      onDone: () {
+        debugPrint('[WS] Connection closed');
+        _handleDisconnect();
+      },
+    );
+
+    debugPrint('[WS] Connected to $url as citizen $userId');
+  } catch (e) {
+    debugPrint('[WS] Connection failed: $e');
+    _handleDisconnect();
+  }
+}
   /// Handle incoming WebSocket messages
   void _handleMessage(dynamic message) {
     try {

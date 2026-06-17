@@ -161,7 +161,7 @@ class _IntelligenceTabScreenState extends State<IntelligenceTabScreen> {
                   return Container(
                     margin: const EdgeInsets.only(right: 8),
                     child: FilterChip(
-                      label: Text(t['label'] as String, style: TextStyle(fontSize: 12)),
+                      label: Text(t['label'] as String, style: const TextStyle(fontSize: 12)),
                       selected: selected,
                       onSelected: (_) => setState(() {
                         _selectedLookupType = t['key'] as String;
@@ -249,7 +249,7 @@ class _IntelligenceTabScreenState extends State<IntelligenceTabScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
-                child: Text('${riskLevel}'.toUpperCase(), style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+                child: Text('$riskLevel'.toUpperCase(), style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
               ),
             ],
           ),

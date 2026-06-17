@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../themes/raksaar_theme.dart';
 
 class LinkScannerScreen extends StatefulWidget {
   const LinkScannerScreen({super.key});

@@ -121,9 +121,10 @@ class ApiClient {
   }
 
   // Fraud Reporting
-  Future<ApiResponse> reportFraud(Map<String, dynamic> report) async {
-    return post('/citizen/reports', data: report);
-  }
+ Future<ApiResponse> reportFraud(
+     Map<String, dynamic> report) async {
+   return post('/osint/report-fraud', data: report);
+ }
 }
 
 /// Wrapper around API responses for backward compat

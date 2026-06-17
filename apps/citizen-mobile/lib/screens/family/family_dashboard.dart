@@ -183,7 +183,7 @@ class _FamilyDashboardState extends ConsumerState<FamilyDashboard> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _selectedRole,
+              initialValue: _selectedRole,
               decoration: const InputDecoration(labelText: 'Role'),
               items: const [
                 DropdownMenuItem(value: 'member', child: Text('Family Member')),

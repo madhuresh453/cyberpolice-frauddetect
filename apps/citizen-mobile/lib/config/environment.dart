@@ -29,7 +29,7 @@ class Environment {
   static const String buildNumber = '200';
 
   // Encryption
-  static const String encryptionKey = 'raksaar_aes_256_key_v2';
+  static const String encryptionKey = '';
   static const int encryptionIterations = 10000;
 
   // Cache durations

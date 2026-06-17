@@ -41,7 +41,7 @@ class ProfileTabScreen extends ConsumerWidget {
             trailing: Switch(
               value: settings.biometricLock,
               onChanged: (_) => ref.read(settingsProvider.notifier).toggleBiometric(),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             theme: theme,
           ),
@@ -52,7 +52,7 @@ class ProfileTabScreen extends ConsumerWidget {
             trailing: Switch(
               value: settings.pinProtection,
               onChanged: (_) => ref.read(settingsProvider.notifier).togglePin(),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             theme: theme,
           ),
@@ -68,7 +68,7 @@ class ProfileTabScreen extends ConsumerWidget {
             trailing: Switch(
               value: settings.threatNotifications,
               onChanged: (_) => ref.read(settingsProvider.notifier).toggleNotifications(),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             theme: theme,
           ),
@@ -79,7 +79,7 @@ class ProfileTabScreen extends ConsumerWidget {
             trailing: Switch(
               value: settings.autoBlockScammers,
               onChanged: (_) => ref.read(settingsProvider.notifier).toggleAutoBlock(),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             theme: theme,
           ),
@@ -95,7 +95,7 @@ class ProfileTabScreen extends ConsumerWidget {
             trailing: Switch(
               value: settings.darkMode,
               onChanged: (_) => ref.read(settingsProvider.notifier).toggleDarkMode(),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             theme: theme,
           ),
@@ -124,7 +124,7 @@ class ProfileTabScreen extends ConsumerWidget {
             trailing: Switch(
               value: settings.exportReports,
               onChanged: (_) => ref.read(settingsProvider.notifier).toggleExportReports(),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             theme: theme,
           ),
@@ -169,7 +169,7 @@ class ProfileTabScreen extends ConsumerWidget {
             trailing: Switch(
               value: settings.emergencySOS,
               onChanged: (_) => ref.read(settingsProvider.notifier).toggleEmergencySOS(),
-              activeColor: Colors.red,
+              activeThumbColor: Colors.red,
             ),
             theme: theme,
           ),
