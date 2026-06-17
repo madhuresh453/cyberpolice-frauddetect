@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../core/app_theme.dart';
 import '../core/config/app_config.dart';
+import '../core/permission_manager.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,17 +41,31 @@ class _SplashScreenState extends State<SplashScreen>
     _navigationTimer = Timer(AppConfig.maxSplashDuration, _navigateToNext);
   }
 
-  void _navigateToNext() {
+  Future<void> _navigateToNext() async {
     if (_navigated || !mounted) return;
     _navigated = true;
+
     try {
-      context.go('/onboarding/1');
+      // Step 1: Check all permissions
+      final permissions = await RaksaarPermissionManager.checkAllPermissions();
+      final allMandatory = permissions['allMandatoryGranted'] == true;
+
+      if (!allMandatory) {
+        // Navigate to permission center if any mandatory permission is missing
+        if (mounted) context.go('/permissions');
+        return;
+      }
+
+      // Step 2: All permissions granted - go to onboarding then auth
+      if (mounted) context.go('/onboarding/1');
     } catch (e) {
-      debugPrint('[Splash] Navigation error: $e — fallback to home');
-      try {
-        context.go('/home');
-      } catch (_) {
-        debugPrint('[Splash] All navigation failed');
+      debugPrint('[Splash] Permission check failed: $e — fallback to permissions');
+      if (mounted) {
+        try {
+          context.go('/permissions');
+        } catch (_) {
+          debugPrint('[Splash] Fallback navigation failed');
+        }
       }
     }
   }
@@ -80,7 +96,6 @@ class _SplashScreenState extends State<SplashScreen>
           ),
           child: Stack(
             children: [
-              // Animated particles
               ...List.generate(
                 20,
                 (i) => Positioned(
@@ -97,7 +112,6 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              // Center shield + branding
               Center(
                 child: Transform.scale(
                   scale: _scaleAnim.value,
@@ -168,7 +182,6 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              // Footer
               Positioned(
                 bottom: 60,
                 left: 0,
@@ -177,6 +190,11 @@ class _SplashScreenState extends State<SplashScreen>
                   opacity: _fadeAnim.value,
                   child: Column(
                     children: [
+                      const Text('Checking permissions...',
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textSecondary)),
+                      const SizedBox(height: 8),
                       Text('National Cyber Safety Platform',
                           style: TextStyle(
                               fontSize: 12,
