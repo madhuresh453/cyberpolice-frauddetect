@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 
 /// RAKSAAR Auth Screen — Login, Register, OTP
@@ -38,7 +39,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     if (auth.status == AuthStatus.authenticated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
+          context.go('/home');
         }
       });
     }
@@ -61,7 +62,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 40),
-                  // Logo
                   Icon(Icons.shield, size: 72, color: theme.colorScheme.primary),
                   const SizedBox(height: 16),
                   Text('RAKSAAR', textAlign: TextAlign.center, style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 2)),
@@ -69,7 +69,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   Text('CyberShield AI', textAlign: TextAlign.center, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
                   const SizedBox(height: 40),
 
-                  // Auth mode tabs
                   SegmentedButton<AuthMode>(
                     segments: const [
                       ButtonSegment(value: AuthMode.login, label: Text('Login')),
@@ -81,7 +80,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Login form
                   if (_mode == AuthMode.login) ...[
                     TextFormField(
                       controller: _emailController,
@@ -99,7 +97,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     TextButton(onPressed: () => setState(() => _mode = AuthMode.forgotPassword), child: const Text('Forgot Password?')),
                   ],
 
-                  // Register form
                   if (_mode == AuthMode.register) ...[
                     TextFormField(
                       controller: _nameController,
@@ -125,7 +122,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ],
 
-                  // OTP form
                   if (_mode == AuthMode.otpLogin) ...[
                     TextFormField(
                       controller: _phoneController,
@@ -140,7 +136,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ],
 
-                  // Forgot password
                   if (_mode == AuthMode.forgotPassword) ...[
                     TextFormField(
                       controller: _emailController,
@@ -151,14 +146,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Error message
                   if (auth.error != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Text(auth.error!, style: TextStyle(color: theme.colorScheme.error, fontSize: 13)),
                     ),
 
-                  // Submit button
                   SizedBox(
                     height: 52,
                     child: ElevatedButton(
@@ -174,6 +167,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ),
 
+                  const SizedBox(height: 24),
+                  TextButton(
+                    onPressed: () => context.go('/home'),
+                    child: const Text('Skip Login'),
+                  ),
                   const SizedBox(height: 24),
                   Text('A Government of India Initiative', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                 ],

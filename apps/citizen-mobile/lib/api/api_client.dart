@@ -93,38 +93,56 @@ class ApiClient {
 
   // Auth
   Future<ApiResponse> login(String email, String password) async {
-    return post('/auth/login', data: {'email': email, 'password': password});
+    return post('/api/v1/auth/login', data: {'email': email, 'password': password});
   }
 
   Future<ApiResponse> register(String email, String password, String fullName, String phoneNumber, {String userType = 'citizen'}) async {
-    return post('/auth/register', data: {
+    return post('/api/v1/auth/register', data: {
       'email': email, 'password': password, 'full_name': fullName,
       'phone_number': phoneNumber, 'user_type': userType,
     });
   }
 
   Future<ApiResponse> sendOtp(String phoneNumber) async {
-    return post('/auth/otp/login', data: {'phone_number': phoneNumber});
+    return post('/api/v1/auth/otp/login', data: {'phone_number': phoneNumber});
   }
 
   Future<ApiResponse> verifyOtp(String phoneNumber, String otp) async {
-    return post('/auth/otp/verify', data: {'phone_number': phoneNumber, 'otp': otp});
+    return post('/api/v1/auth/otp/verify', data: {'phone_number': phoneNumber, 'otp': otp});
   }
 
   // OSINT / Trust Score
   Future<ApiResponse> checkPhoneReputation(String phoneNumber) async {
-    return post('/osint/phone', data: {'phone_number': phoneNumber});
+    return post('/api/v1/osint/phone', data: {'phone_number': phoneNumber});
   }
 
   Future<ApiResponse> checkUpiReputation(String upiId) async {
-    return post('/osint/upi', data: {'upi_id': upiId});
+    return post('/api/v1/osint/upi', data: {'upi_id': upiId});
   }
 
   // Fraud Reporting
  Future<ApiResponse> reportFraud(
      Map<String, dynamic> report) async {
-   return post('/osint/report-fraud', data: report);
+   return post('/api/v1/osint/report-fraud', data: report);
  }
+
+  // Refresh token
+  Future<ApiResponse> refreshToken(String refreshToken) async {
+    return post('/api/v1/auth/refresh', data: {'refresh_token': refreshToken});
+  }
+
+  // Get current user profile
+  Future<ApiResponse> getProfile() async {
+    return get('/api/v1/auth/me');
+  }
+
+  // Change password
+  Future<ApiResponse> changePassword(String currentPassword, String newPassword) async {
+    return post('/api/v1/auth/change-password', data: {
+      'current_password': currentPassword,
+      'new_password': newPassword,
+    });
+  }
 }
 
 /// Wrapper around API responses for backward compat

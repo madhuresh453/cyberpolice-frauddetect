@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../core/permission_manager.dart';
 import '../../core/config/app_config.dart';
 
@@ -14,6 +15,7 @@ class ProfileTabScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
+    final auth = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,11 +30,9 @@ class ProfileTabScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Profile Card
-          _buildProfileCard(theme),
+          _buildProfileCard(context, theme, auth),
           const SizedBox(height: 20),
 
-          // Settings Section
           _sectionHeader('Security', Icons.security, theme),
           _settingsTile(
             icon: Icons.fingerprint,
@@ -59,7 +59,6 @@ class ProfileTabScreen extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Notifications
           _sectionHeader('Notifications', Icons.notifications, theme),
           _settingsTile(
             icon: Icons.warning_amber,
@@ -86,7 +85,6 @@ class ProfileTabScreen extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Appearance
           _sectionHeader('Appearance', Icons.palette, theme),
           _settingsTile(
             icon: Icons.dark_mode,
@@ -102,7 +100,6 @@ class ProfileTabScreen extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Permissions
           _sectionHeader('Permissions', Icons.verified_user, theme),
           _settingsTile(
             icon: Icons.shield,
@@ -115,7 +112,6 @@ class ProfileTabScreen extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Data & Privacy
           _sectionHeader('Data & Privacy', Icons.storage, theme),
           _settingsTile(
             icon: Icons.file_download,
@@ -139,7 +135,6 @@ class ProfileTabScreen extends ConsumerWidget {
 
           const Divider(height: 32),
 
-          // Account
           _sectionHeader('Account', Icons.person, theme),
           _settingsTile(
             icon: Icons.language,
@@ -155,28 +150,11 @@ class ProfileTabScreen extends ConsumerWidget {
             subtitle: 'Update your password',
             trailing: const Icon(Icons.chevron_right),
             theme: theme,
-            onTap: () {},
+            onTap: () => context.push('/auth'),
           ),
 
           const Divider(height: 32),
 
-          // Emergency
-          _sectionHeader('Emergency', Icons.warning, theme),
-          _settingsTile(
-            icon: Icons.sos,
-            title: 'Emergency SOS',
-            subtitle: 'Quick-access emergency mode',
-            trailing: Switch(
-              value: settings.emergencySOS,
-              onChanged: (_) => ref.read(settingsProvider.notifier).toggleEmergencySOS(),
-              activeThumbColor: Colors.red,
-            ),
-            theme: theme,
-          ),
-
-          const Divider(height: 32),
-
-          // App Info
           _sectionHeader('App Info', Icons.info, theme),
           _settingsTile(
             icon: Icons.update,
@@ -203,11 +181,10 @@ class ProfileTabScreen extends ConsumerWidget {
 
           const SizedBox(height: 24),
 
-          // Logout
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _showLogoutDialog(context),
+              onPressed: () => _showLogoutDialog(context, ref),
               icon: const Icon(Icons.logout, color: Colors.red),
               label: const Text('Logout', style: TextStyle(color: Colors.red)),
               style: OutlinedButton.styleFrom(
@@ -222,7 +199,11 @@ class ProfileTabScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileCard(ThemeData theme) {
+  Widget _buildProfileCard(
+  BuildContext context,
+  ThemeData theme,
+  AuthState auth,
+) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -242,8 +223,8 @@ class ProfileTabScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Citizen', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text('citizen@raksaar.gov.in', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                  Text(auth.fullName ?? 'Citizen', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(auth.email ?? 'citizen@raksaar.gov.in', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -258,7 +239,7 @@ class ProfileTabScreen extends ConsumerWidget {
             ),
             IconButton(
               icon: const Icon(Icons.edit, size: 20),
-              onPressed: () {},
+              onPressed: () => context.push('/auth'),
             ),
           ],
         ),
@@ -316,7 +297,6 @@ class ProfileTabScreen extends ConsumerWidget {
                 const Text('Permission Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
                 _permRow('Phone', p['callLogs']),
-                _permRow('Call Logs', p['callLogs']),
                 _permRow('Contacts', p['contacts']),
                 _permRow('SMS', p['sms']),
                 _permRow('Camera', p['camera']),
@@ -326,7 +306,6 @@ class ProfileTabScreen extends ConsumerWidget {
                 Text('Optional', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                 _permRow('Location', p['location']),
                 _permRow('Overlay', p['overlay']),
-                _permRow('Accessibility', p['accessibility']),
                 _permRow('Battery', p['batteryOptimization']),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -419,22 +398,26 @@ class ProfileTabScreen extends ConsumerWidget {
       applicationName: 'RAKSAAR',
       applicationVersion: '${AppConfig.appVersion} (${AppConfig.buildNumber})',
       applicationIcon: const Icon(Icons.shield, size: 48, color: Colors.blue),
-      children: [
-        const Text('Cyber Safety Operating System\nA Government of India Initiative\nDPDP 2023 Compliant\n\nProtecting citizens from cyber fraud using AI.'),
+      children: const [
+        Text('Cyber Safety Operating System\nA Government of India Initiative\nDPDP 2023 Compliant\n\nProtecting citizens from cyber fraud using AI.'),
       ],
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext outerContext, WidgetRef ref) {
     showDialog(
-      context: context,
+      context: outerContext,
       builder: (ctx) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout? All protection services will stop.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authProvider.notifier).logout();
+              outerContext.go('/auth');
+            },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Logout', style: TextStyle(color: Colors.white)),
           ),

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'app.dart';
+import 'routes/app_router.dart';
 import 'core/permission_manager.dart';
 import 'services/local_notification_service.dart';
 import 'providers/app_providers.dart';
+import 'providers/auth_provider.dart';
+import 'themes/raksaar_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +20,6 @@ void main() async {
     await Hive.initFlutter();
     debugPrint('[startup] Hive initialized successfully');
 
-    // Open each box individually with try/catch so one failure doesn't block all
     final boxes = ['settings', 'auth', 'emergency', 'evidence_queue', 'blocked_numbers', 'threat_cache'];
     for (final name in boxes) {
       try {
@@ -33,7 +34,6 @@ void main() async {
     debugPrint('[startup] Hive init FAILED: $e');
     debugPrint('[startup] Stack trace: $s');
     startupErrors.add('Hive.initFlutter: $e');
-    // Continue — app must launch even without Hive
   }
 
   // ─── Safe notification init ───
@@ -75,4 +75,34 @@ void main() async {
       child: RaksaarApp(startupErrors: startupErrors),
     ),
   );
+}
+
+class RaksaarApp extends ConsumerWidget {
+  final List<String> startupErrors;
+
+  const RaksaarApp({super.key, this.startupErrors = const []});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final authState = ref.watch(authProvider);
+
+    return MaterialApp.router(
+      title: 'RAKSAAR',
+      debugShowCheckedModeBanner: false,
+      themeMode: themeMode,
+      theme: RaksaarTheme.lightTheme,
+      darkTheme: RaksaarTheme.darkTheme,
+      routerConfig: goRouter,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(
+                MediaQuery.of(context).textScaleFactor.clamp(0.8, 1.3)),
+          ),
+          child: child!,
+        );
+      },
+    );
+  }
 }

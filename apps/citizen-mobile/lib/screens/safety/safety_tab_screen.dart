@@ -24,29 +24,24 @@ class SafetyTabScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // SOS Button
           _buildSOSCard(context, theme),
           const SizedBox(height: 20),
 
-          // Emergency Quick Actions
           Text('Emergency Services', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           _buildEmergencyActions(context, theme),
           const SizedBox(height: 20),
 
-          // Women Safety
           Text('Women Safety', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           _buildWomenSafetySection(context, theme),
           const SizedBox(height: 20),
 
-          // Trusted Contacts
           Text('Trusted Contacts', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           _buildTrustedContacts(context, theme),
           const SizedBox(height: 20),
 
-          // Family Protection
           Text('Family Protection', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           _buildFamilyProtection(context, theme),
@@ -91,8 +86,8 @@ class SafetyTabScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _sosOption(Icons.volume_up, 'Silent SOS', () => _triggerSilentSOS(context)),
-                _sosOption(Icons.videocam, 'Record Video', () => _startVideoRecording(context)),
-                _sosOption(Icons.mic, 'Record Audio', () => _startAudioRecording(context)),
+                _sosOption(Icons.videocam, 'Record Video', () => context.push('/emergency-sos')),
+                _sosOption(Icons.mic, 'Record Audio', () => context.push('/emergency-sos')),
                 _sosOption(Icons.share, 'Share Location', () => _shareLocation(context)),
               ],
             ),
@@ -154,9 +149,9 @@ class SafetyTabScreen extends StatelessWidget {
   Widget _buildWomenSafetySection(BuildContext context, ThemeData theme) {
     final features = [
       {'title': 'Emergency Contacts', 'subtitle': 'Manage your emergency contacts', 'icon': Icons.contacts, 'route': '/emergency'},
-      {'title': 'Location Sharing', 'subtitle': 'Share live location with trusted contacts', 'icon': Icons.location_on, 'route': ''},
-      {'title': 'Safety Alerts', 'subtitle': 'Area-based safety notifications', 'icon': Icons.notifications_active, 'route': ''},
-      {'title': 'Fake Call', 'subtitle': 'Simulate an incoming call to escape', 'icon': Icons.phone_in_talk, 'route': ''},
+      {'title': 'Location Sharing', 'subtitle': 'Share live location with trusted contacts', 'icon': Icons.location_on, 'route': '/settings'},
+      {'title': 'Safety Alerts', 'subtitle': 'Area-based safety notifications', 'icon': Icons.notifications_active, 'route': '/settings'},
+      {'title': 'Fake Call', 'subtitle': 'Simulate an incoming call to escape', 'icon': Icons.phone_in_talk, 'route': '/call/incoming'},
     ];
 
     return Column(
@@ -264,44 +259,13 @@ class SafetyTabScreen extends StatelessWidget {
   }
 
   void _triggerSOS(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.warning, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Emergency SOS'),
-          ],
-        ),
-        content: const Text('This will alert your emergency contacts and share your location. Continue?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _dialNumber('112');
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Activate', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
+    context.push('/emergency-sos');
   }
 
   void _triggerSilentSOS(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Silent SOS activated – contacts notified'), backgroundColor: Colors.red),
     );
-  }
-
-  void _startVideoRecording(BuildContext context) {
-    context.push('/emergency');
-  }
-
-  void _startAudioRecording(BuildContext context) {
-    context.push('/emergency');
   }
 
   void _shareLocation(BuildContext context) {

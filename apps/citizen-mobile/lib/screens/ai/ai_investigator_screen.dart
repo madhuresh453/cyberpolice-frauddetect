@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../api/api_client.dart';
 import '../../themes/raksaar_theme.dart';
 import '../../core/config/app_config.dart';
@@ -42,7 +43,6 @@ class _AiInvestigatorScreenState extends ConsumerState<AiInvestigatorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Analysis type selector
             SegmentedButton<String>(
               segments: const [
                 ButtonSegment(value: 'text', label: Text('Text'), icon: Icon(Icons.text_fields, size: 16)),
@@ -55,7 +55,6 @@ class _AiInvestigatorScreenState extends ConsumerState<AiInvestigatorScreen> {
             ),
             const SizedBox(height: 24),
             
-            // Input area
             TextField(
               controller: _textController,
               maxLines: 5,
@@ -70,13 +69,12 @@ class _AiInvestigatorScreenState extends ConsumerState<AiInvestigatorScreen> {
             ),
             const SizedBox(height: 12),
             
-            // Analyze button
             SizedBox(
               width: double.infinity,
               height: 48,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  setState(() {}); // Trigger analysis
+                  setState(() {});
                   ref.invalidate(aiResultProvider(_textController.text));
                 },
                 icon: const Icon(Icons.radar),
@@ -85,7 +83,6 @@ class _AiInvestigatorScreenState extends ConsumerState<AiInvestigatorScreen> {
             ),
             const SizedBox(height: 16),
             
-            // Results
             Expanded(
               child: resultAsync?.when(
                 data: (result) => _AnalysisResultCard(result: result, theme: theme),
@@ -97,7 +94,7 @@ class _AiInvestigatorScreenState extends ConsumerState<AiInvestigatorScreen> {
                       Icon(Icons.cloud_off, size: 48, color: Colors.grey[500]),
                       const SizedBox(height: 8),
                       Text('Connect to AI Gateway', style: TextStyle(color: Colors.grey[500])),
-Text(AppConfig.aiBaseUrl, style: TextStyle(color: Colors.grey[600], fontSize: 11)),
+                      Text(AppConfig.aiBaseUrl, style: TextStyle(color: Colors.grey[600], fontSize: 11)),
                     ],
                   ),
                 ),
@@ -192,7 +189,7 @@ class _AnalysisResultCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: TextButton.icon(
-                onPressed: () {},
+                onPressed: () => context.push('/report'),
                 icon: const Icon(Icons.description, size: 16),
                 label: const Text('View Full Report'),
               ),
