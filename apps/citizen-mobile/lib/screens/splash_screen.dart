@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../core/app_theme.dart';
 import '../core/config/app_config.dart';
 import '../core/permission_manager.dart';

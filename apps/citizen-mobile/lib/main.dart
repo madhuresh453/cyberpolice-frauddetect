@@ -6,7 +6,6 @@ import 'routes/app_router.dart';
 import 'core/permission_manager.dart';
 import 'services/local_notification_service.dart';
 import 'providers/app_providers.dart';
-import 'providers/auth_provider.dart';
 import 'themes/raksaar_theme.dart';
 
 void main() async {
@@ -85,7 +84,6 @@ class RaksaarApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
-    final authState = ref.watch(authProvider);
 
     return MaterialApp.router(
       title: 'RAKSAAR',
@@ -98,7 +96,7 @@ class RaksaarApp extends ConsumerWidget {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler: TextScaler.linear(
-                MediaQuery.of(context).textScaleFactor.clamp(0.8, 1.3)),
+                MediaQuery.of(context).textScaler.textScaleFactor.clamp(0.8, 1.3)),
           ),
           child: child!,
         );

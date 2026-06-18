@@ -195,17 +195,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
   @override
   Widget build(BuildContext context) {
     if (_checking) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: AppTheme.background,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.shield, size: 64, color: AppTheme.primaryBlue),
-              const SizedBox(height: 24),
-              const CircularProgressIndicator(color: AppTheme.primaryBlue),
-              const SizedBox(height: 16),
-              const Text('Checking permissions...', style: TextStyle(color: AppTheme.textSecondary)),
+              Icon(Icons.shield, size: 64, color: AppTheme.primaryBlue),
+              SizedBox(height: 24),
+              CircularProgressIndicator(color: AppTheme.primaryBlue),
+              SizedBox(height: 16),
+              Text('Checking permissions...', style: TextStyle(color: AppTheme.textSecondary)),
             ],
           ),
         ),
@@ -213,19 +213,19 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     }
 
     if (_allGranted) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: AppTheme.background,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, size: 80, color: AppTheme.successGreen),
-              const SizedBox(height: 24),
-              const Text('All Permissions Granted', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-              const SizedBox(height: 8),
-              const Text('Starting CyberShield Protection...', style: TextStyle(color: AppTheme.textSecondary)),
-              const SizedBox(height: 24),
-              const CircularProgressIndicator(color: AppTheme.successGreen),
+              Icon(Icons.check_circle, size: 80, color: AppTheme.successGreen),
+              SizedBox(height: 24),
+              Text('All Permissions Granted', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              SizedBox(height: 8),
+              Text('Starting CyberShield Protection...', style: TextStyle(color: AppTheme.textSecondary)),
+              SizedBox(height: 24),
+              CircularProgressIndicator(color: AppTheme.successGreen),
             ],
           ),
         ),

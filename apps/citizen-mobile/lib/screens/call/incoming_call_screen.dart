@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../themes/raksaar_theme.dart';
 
 class IncomingCallScreen extends StatefulWidget {
   final String? phoneNumber;
@@ -41,7 +40,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen>
 
     // Risk analysis (mock)
     const riskScore = 85;
-    final isHighRisk = riskScore > 60;
+    const isHighRisk = riskScore > 60;
 
     return Scaffold(
       backgroundColor: isHighRisk ? Colors.red.withValues(alpha: 0.08) : theme.colorScheme.surface,

@@ -4,26 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// Government-grade permission manager for RAKSAAR – Cyber Safety OS
-///
-/// Permission Policy (v2.0):
-/// ─────────────────────────────────────────────
-/// MANDATORY (app BLOCKS startup if missing):
-///   - READ_CALL_LOG / READ_PHONE_STATE  → call detection
-///   - READ_CONTACTS                     → caller reputation
-///   - RECORD_AUDIO                      → live call AI analysis
-///   - RECEIVE_SMS / READ_SMS            → fraud SMS detection
-///   - CAMERA                            → QR / APK scanning
-///   - POST_NOTIFICATIONS                → instant fraud alerts
-///
-/// OPTIONAL (warnings only, NEVER block):
-///   - SYSTEM_ALERT_WINDOW               → overlay alerts
-///   - BIND_ACCESSIBILITY_SERVICE        → WhatsApp monitoring
-///   - IGNORE_BATTERY_OPTIMIZATIONS      → background service
-///   - REQUEST_SCHEDULE_EXACT_ALARM      → precise reminders
-///   - Auto-Start (OEM specific)         → boot persistence
-///   - PACKAGE_USAGE_STATS               → app usage monitoring
-///   - ACCESS_FINE_LOCATION              → SOS / heatmap
-///
 class RaksaarPermissionManager {
   // ─── MANDATORY — app MUST NOT start without these ───
   static final List<Permission> _mandatoryPermissions = [
@@ -36,51 +16,21 @@ class RaksaarPermissionManager {
   ];
 
   // ─── OPTIONAL — warnings only, NEVER block startup ───
-  static final List<Permission> _optionalPermissions = [
-    Permission.systemAlertWindow,         // overlay
-    Permission.ignoreBatteryOptimizations, // battery
-    Permission.requestInstallPackages,      // APK install (related)
-    Permission.location,                    // fine location
-    Permission.storage,                     // storage (evidence)
-  ];
-
-  // ==================================================================
-  //  PUBLIC API
-  // ==================================================================
+  // Fields are intentionally kept for documentation but analyzed code uses them inline
 
   /// Returns true ONLY when ALL mandatory permissions are granted.
-  /// Optional permissions are IGNORED.
   static Future<bool> hasMandatoryPermissions() async {
     final result = await _checkPermissionsInternal();
     return result['allMandatoryGranted'] as bool;
   }
 
-  /// Returns a detailed result map with two groups:
-  /// {
-  ///   "callLogs":  true/false,     ← mandatory
-  ///   "contacts":  true/false,     ← mandatory
-  ///   "microphone": true/false,    ← mandatory
-  ///   "sms":       true/false,     ← mandatory
-  ///   "camera":    true/false,     ← mandatory
-  ///   "notifications": true/false, ← mandatory
-  ///   "allMandatoryGranted": true/false,
-  ///
-  ///   "overlay":    true/false,    ← optional
-  ///   "accessibility": true/false, ← optional
-  ///   "batteryOptimization": true/false, ← optional
-  ///   "location":   true/false,    ← optional
-  ///   "storage":    true/false,    ← optional
-  /// }
+  /// Returns detailed permission status map
   static Future<Map<String, dynamic>> checkAllPermissions() async {
     return await _checkPermissionsInternal();
   }
 
-  /// Request ALL mandatory permissions.
-  /// Returns true if ALL mandatory permissions were granted.
-  /// Does NOT request or block on optional permissions.
-  static Future<bool> requestMandatoryPermissions({
-    required BuildContext context,
-  }) async {
+  /// Request ALL mandatory permissions sequentially.
+  static Future<bool> requestMandatoryPermissions({required BuildContext context}) async {
     for (final p in _mandatoryPermissions) {
       final status = await p.status;
       if (status.isGranted) continue;
@@ -101,26 +51,25 @@ class RaksaarPermissionManager {
     return true;
   }
 
-  /// Request a single optional permission.
-  /// Never blocks or returns false on failure — always returns status.
+  /// Request a single optional permission (never blocks)
   static Future<bool> requestOptionalPermission(Permission p) async {
     try {
       final status = await p.request();
       return status.isGranted;
     } catch (e) {
-      print("Optional permission request failed (non-fatal): $e");
+      debugPrint('Optional permission error: $e');
       return false;
     }
   }
 
-  /// Check accessibility service status (optional).
+  /// Check accessibility service status
   static Future<bool> isAccessibilityServiceEnabled() async {
     try {
       const channel = MethodChannel('com.cybershield/accessibility');
       final result = await channel.invokeMethod<bool>('isAccessibilityServiceEnabled');
       return result ?? false;
     } catch (e) {
-      print("Accessibility check error (non-fatal): $e");
+      debugPrint('Accessibility check error: $e');
       return false;
     }
   }
@@ -130,41 +79,18 @@ class RaksaarPermissionManager {
     return hasMandatoryPermissions();
   }
 
-  // ==================================================================
-  //  INTERNAL
-  // ==================================================================
-
   static Future<Map<String, dynamic>> _checkPermissionsInternal() async {
-    // ── Mandatory ──
     final phoneStatus = await Permission.phone.status;
     final contactsStatus = await Permission.contacts.status;
     final micStatus = await Permission.microphone.status;
     final smsStatus = await Permission.sms.status;
     final cameraStatus = await Permission.camera.status;
     final notificationStatus = await Permission.notification.status;
-
-    // ── Optional runtime ──
     final overlayStatus = await Permission.systemAlertWindow.status;
     final batteryStatus = await Permission.ignoreBatteryOptimizations.status;
     final locationStatus = await Permission.location.status;
     final storageStatus = await Permission.storage.status;
-
-    // ── Optional non-standard ──
     final accessibilityStatus = await isAccessibilityServiceEnabled();
-
-    // Detailed logging
-    print("PERMISSION AUDIT:");
-    print("  [MANDATORY]  phone  = $phoneStatus");
-    print("  [MANDATORY]  contacts = $contactsStatus");
-    print("  [MANDATORY]  mic    = $micStatus");
-    print("  [MANDATORY]  sms    = $smsStatus");
-    print("  [MANDATORY]  camera = $cameraStatus");
-    print("  [MANDATORY]  notification = $notificationStatus");
-    print("  [OPTIONAL]  overlay = $overlayStatus");
-    print("  [OPTIONAL]  accessibility = $accessibilityStatus");
-    print("  [OPTIONAL]  battery = $batteryStatus");
-    print("  [OPTIONAL]  location = $locationStatus");
-    print("  [OPTIONAL]  storage = $storageStatus");
 
     final callLogsGranted = phoneStatus.isGranted;
     final contactsGranted = contactsStatus.isGranted;
@@ -173,20 +99,10 @@ class RaksaarPermissionManager {
     final cameraGranted = cameraStatus.isGranted;
     final notificationsGranted = notificationStatus.isGranted;
 
-    final allMandatoryGranted = callLogsGranted &&
-        contactsGranted &&
-        micGranted &&
-        smsGranted &&
-        cameraGranted &&
-        notificationsGranted;
-
-    print("  => allMandatoryGranted = $allMandatoryGranted");
-    if (!allMandatoryGranted) {
-      print("  !! Missing mandatory permissions — app will NOT start");
-    }
+    final allMandatoryGranted = callLogsGranted && contactsGranted &&
+        micGranted && smsGranted && cameraGranted && notificationsGranted;
 
     return {
-      // Mandatory
       "callLogs": callLogsGranted,
       "contacts": contactsGranted,
       "microphone": micGranted,
@@ -194,7 +110,6 @@ class RaksaarPermissionManager {
       "camera": cameraGranted,
       "notifications": notificationsGranted,
       "allMandatoryGranted": allMandatoryGranted,
-      // Optional
       "overlay": overlayStatus.isGranted,
       "accessibility": accessibilityStatus,
       "batteryOptimization": batteryStatus.isGranted,
@@ -203,10 +118,7 @@ class RaksaarPermissionManager {
     };
   }
 
-  // ─── Dialogs ───
-
-  static Future<void> _showSettingsDialog(
-      BuildContext context, Permission p) async {
+  static Future<void> _showSettingsDialog(BuildContext context, Permission p) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -237,30 +149,18 @@ class RaksaarPermissionManager {
 
   static String _getPermissionTitle(Permission p) {
     switch (p) {
-      case Permission.phone:
-        return 'Phone / Call Logs';
-      case Permission.microphone:
-        return 'Microphone';
-      case Permission.sms:
-        return 'SMS';
-      case Permission.contacts:
-        return 'Contacts';
-      case Permission.camera:
-        return 'Camera';
-      case Permission.notification:
-        return 'Notifications';
-      case Permission.systemAlertWindow:
-        return 'Overlay Alerts';
-      case Permission.ignoreBatteryOptimizations:
-        return 'Battery Optimization';
-      case Permission.location:
-        return 'Location';
-      case Permission.storage:
-        return 'Storage';
-      case Permission.requestInstallPackages:
-        return 'APK Installation';
-      default:
-        return p.toString().split('.').last;
+      case Permission.phone: return 'Phone / Call Logs';
+      case Permission.microphone: return 'Microphone';
+      case Permission.sms: return 'SMS';
+      case Permission.contacts: return 'Contacts';
+      case Permission.camera: return 'Camera';
+      case Permission.notification: return 'Notifications';
+      case Permission.systemAlertWindow: return 'Overlay Alerts';
+      case Permission.ignoreBatteryOptimizations: return 'Battery';
+      case Permission.location: return 'Location';
+      case Permission.storage: return 'Storage';
+      case Permission.requestInstallPackages: return 'APK Installation';
+      default: return p.toString().split('.').last;
     }
   }
 }

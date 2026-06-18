@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../themes/app_theme.dart';
 import '../../api/api_client.dart';
-import '../../providers/upi_protection_provider.dart';
 
 class UpiProtectionScreen extends ConsumerStatefulWidget {
   const UpiProtectionScreen({super.key});
